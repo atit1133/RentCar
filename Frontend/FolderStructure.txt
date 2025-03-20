@@ -1,0 +1,46 @@
+car-rental-frontend/
+├── public/
+│   ├── index.html
+│   └── ...
+├── src/
+│   ├── assets/
+│   │   ├── images/
+│   │   └── icons/
+│   ├── components/
+│   │   ├── CarCard/
+│   │   │   └── CarCard.jsx
+│   │   ├── CarList/
+│   │   │   └── CarList.jsx
+│   │   ├── Navbar/
+│   │   │   └── Navbar.jsx
+│   │   ├── Footer/
+│   │   │   └── Footer.jsx
+│   │   └── ...
+│   ├── pages/
+│   │   ├── Home/
+│   │   │   └── Home.jsx
+│   │   ├── CarDetails/
+│   │   │   └── CarDetails.jsx
+│   │   ├── Booking/
+│   │   │   └── Booking.jsx
+│   │   ├── Login/
+│   │   │   └── Login.jsx
+│   │   └── ...
+│   ├── services/
+│   │   ├── api.js
+│   │   └── ...
+│   ├── store/
+│   │   ├── slices/
+│   │   │   ├── carSlice.js
+│   │   │   └── userSlice.js
+│   │   └── store.js
+│   ├── utils/
+│   │   ├── constants.js
+│   │   └── helpers.js
+│   ├── App.jsx
+│   ├── index.js
+│   └── ...
+├── .gitignore
+├── package.json
+├── README.md
+└── ...
