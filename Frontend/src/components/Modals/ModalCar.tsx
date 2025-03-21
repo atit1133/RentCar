@@ -15,19 +15,38 @@ import { useState } from "react";
 interface ModalCarProps {
   openModal: boolean;
   setOpenModal: React.Dispatch<React.SetStateAction<boolean>>;
+  refreshData: () => void;
 }
 
-const ModalCar = ({ openModal, setOpenModal }: ModalCarProps) => {
-  const [formData, setFormData] = useState({
-    Brand: "",
-    Model: "",
-    Color: "",
-    Year: "",
-    LicensePlate: "",
-    Chassis: "",
-    Transmission: "",
-    Category: "",
-    Status: "",
+interface Car {
+  carId: number;
+  brand: string;
+  model: string;
+  color: string;
+  year: number;
+  licensePlate: string;
+  chassis: string;
+  fuel: string;
+  transmission: string;
+  category: string;
+  status: string;
+  image: string;
+}
+
+const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
+  const [formData, setFormData] = useState<Car>({
+    carId: 0,
+    brand: "",
+    model: "",
+    color: "",
+    year: 0,
+    licensePlate: "",
+    chassis: "",
+    transmission: "",
+    category: "",
+    status: "",
+    image: "",
+    fuel: "",
   });
 
   const handleChange = (event: any) => {
@@ -35,9 +54,32 @@ const ModalCar = ({ openModal, setOpenModal }: ModalCarProps) => {
     setFormData({ ...formData, [name]: value });
   };
 
+  const Url = "http://localhost:5297/api/";
+
+  const fetchAddCar = async () => {
+    try {
+      const response = await fetch(`${Url}Cars`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      console.log("Car added successfully:", data);
+    } catch (error) {
+      console.error("Error adding car:", error);
+    }
+  };
+
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     console.log("Form Data Submitted:", formData);
+    fetchAddCar();
+    refreshData();
   };
 
   return (
@@ -87,7 +129,7 @@ const ModalCar = ({ openModal, setOpenModal }: ModalCarProps) => {
               variant="outlined"
               fullWidth
               required
-              value={formData.Brand}
+              value={formData.brand}
               onChange={handleChange}
             />
             <TextField
@@ -96,7 +138,7 @@ const ModalCar = ({ openModal, setOpenModal }: ModalCarProps) => {
               variant="outlined"
               fullWidth
               required
-              value={formData.Model}
+              value={formData.model}
               onChange={handleChange}
             />
           </Stack>
@@ -108,7 +150,7 @@ const ModalCar = ({ openModal, setOpenModal }: ModalCarProps) => {
               <Select
                 name="Color"
                 label="Color"
-                value={formData.Color}
+                value={formData.color}
                 onChange={handleChange}
               >
                 <MenuItem value="Red">Red</MenuItem>
@@ -123,7 +165,7 @@ const ModalCar = ({ openModal, setOpenModal }: ModalCarProps) => {
               variant="outlined"
               fullWidth
               required
-              value={formData.Year}
+              value={formData.year}
               onChange={handleChange}
             />
           </Stack>
@@ -136,7 +178,7 @@ const ModalCar = ({ openModal, setOpenModal }: ModalCarProps) => {
               variant="outlined"
               fullWidth
               required
-              value={formData.LicensePlate}
+              value={formData.licensePlate}
               onChange={handleChange}
             />
             <TextField
@@ -145,7 +187,7 @@ const ModalCar = ({ openModal, setOpenModal }: ModalCarProps) => {
               variant="outlined"
               fullWidth
               required
-              value={formData.Chassis}
+              value={formData.chassis}
               onChange={handleChange}
             />
           </Stack>
@@ -157,7 +199,7 @@ const ModalCar = ({ openModal, setOpenModal }: ModalCarProps) => {
               <Select
                 name="Transmission"
                 label="Transmission"
-                value={formData.Transmission}
+                value={formData.transmission}
                 onChange={handleChange}
               >
                 <MenuItem value="Automatic">Automatic</MenuItem>
@@ -169,7 +211,7 @@ const ModalCar = ({ openModal, setOpenModal }: ModalCarProps) => {
               <Select
                 name="Category"
                 label="Category"
-                value={formData.Category}
+                value={formData.category}
                 onChange={handleChange}
               >
                 <MenuItem value="SUV">SUV</MenuItem>
@@ -186,7 +228,7 @@ const ModalCar = ({ openModal, setOpenModal }: ModalCarProps) => {
               <Select
                 name="Status"
                 label="Status"
-                value={formData.Status}
+                value={formData.status}
                 onChange={handleChange}
               >
                 <MenuItem value="Available">Available</MenuItem>

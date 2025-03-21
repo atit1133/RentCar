@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Cors;
 using rentCar.Data;
 using rentCar.Interfaces;
 using rentCar.Services;
@@ -24,6 +25,17 @@ builder.Services.AddScoped<ICar, CarService>();
 builder.Services.AddScoped<IRential, RentialService>();
 builder.Services.AddScoped<IUser, UserService>();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactFrontend",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:5173") // Replace with your React app's origin
+                   .AllowAnyHeader()
+                   .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -33,7 +45,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowReactFrontend");
+
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
+
 
 app.MapControllers();
 

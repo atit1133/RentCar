@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Naruemon Aemwong\\OneDrive\\Desktop\\Portfolio\\rentCar\\Backend\\rentCar.csproj": {}
+    "C:\\Users\\Naruemon Aemwong\\OneDrive\\Desktop\\Portfolio\\rentCar\\backend\\rentCar.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Naruemon Aemwong\\OneDrive\\Desktop\\Portfolio\\rentCar\\Backend\\rentCar.csproj": {
+    "C:\\Users\\Naruemon Aemwong\\OneDrive\\Desktop\\Portfolio\\rentCar\\backend\\rentCar.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Naruemon Aemwong\\OneDrive\\Desktop\\Portfolio\\rentCar\\Backend\\rentCar.csproj",
+        "projectUniqueName": "C:\\Users\\Naruemon Aemwong\\OneDrive\\Desktop\\Portfolio\\rentCar\\backend\\rentCar.csproj",
         "projectName": "rentCar",
-        "projectPath": "C:\\Users\\Naruemon Aemwong\\OneDrive\\Desktop\\Portfolio\\rentCar\\Backend\\rentCar.csproj",
+        "projectPath": "C:\\Users\\Naruemon Aemwong\\OneDrive\\Desktop\\Portfolio\\rentCar\\backend\\rentCar.csproj",
         "packagesPath": "C:\\Users\\Naruemon Aemwong\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Naruemon Aemwong\\OneDrive\\Desktop\\Portfolio\\rentCar\\Backend\\obj\\",
+        "outputPath": "C:\\Users\\Naruemon Aemwong\\OneDrive\\Desktop\\Portfolio\\rentCar\\backend\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

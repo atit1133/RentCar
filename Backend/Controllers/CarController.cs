@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using rentCar.Interfaces;
 using rentCar.Models;
@@ -44,6 +45,18 @@ namespace rentCar.Controllers
             return Ok(car);
         }
 
+        [HttpPost("add-car")]
+        public async Task<IActionResult> AddCar([FromForm] Car car, [FromForm] IFormFile? imageFile)
+        {
+            var result = await _car.AddCar(car, imageFile);
+            if (result == null)
+            {
+                return BadRequest("Failed to add car.");
+            }
+            return Ok(result);
+        }
+
+
         [HttpPost]
         public async Task<ActionResult<Car>> Post([FromBody] Car car)
         {
@@ -56,9 +69,9 @@ namespace rentCar.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<bool>> Put(int id, [FromBody] Car car)
+        public async Task<ActionResult<bool>> Put(int id, [FromBody] Car car, [FromForm] IFormFile? imageFile)
         {
-            var updatedCar = await _car.UpdateCar(car);
+            var updatedCar = await _car.UpdateCar(car, imageFile);
             if (id != car.CarId)
             {
                 return BadRequest("The id in the route and the body are not same");

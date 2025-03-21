@@ -1,45 +1,114 @@
 import { Box, Button, Stack, Typography } from "@mui/material";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridActionsCellItem,
+  GridRowId,
+} from "@mui/x-data-grid";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
+import DeleteIcon from "@mui/icons-material/Delete";
 import Paper from "@mui/material/Paper";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ModalCustomer from "../components/Modals/ModalCustomer";
 
-const columns: GridColDef[] = [
-  { field: "id", headerName: "ID", width: 70 },
-  { field: "firstName", headerName: "First Name", width: 150 },
-  { field: "lastName", headerName: "Last Name", width: 150 },
-  { field: "age", headerName: "Age", type: "number", width: 100 },
-  {
-    field: "fullName",
-    headerName: "Full Name",
-    description: "This column combines first and last names.",
-    sortable: false,
-    width: 200,
-    valueGetter: (value, row) => `${row.firstName || ""} ${row.lastName || ""}`,
-  },
-];
-
-const rows = [
-  { id: 1, lastName: "Snow", firstName: "Jon", age: 35 },
-  { id: 2, lastName: "Lannister", firstName: "Cersei", age: 42 },
-  { id: 3, lastName: "Lannister", firstName: "Jaime", age: 45 },
-  { id: 4, lastName: "Stark", firstName: "Arya", age: 16 },
-  { id: 5, lastName: "Targaryen", firstName: "Daenerys", age: null },
-  { id: 6, lastName: "Melisandre", firstName: "", age: 150 },
-  { id: 7, lastName: "Clifford", firstName: "Ferrara", age: 44 },
-  { id: 8, lastName: "Frances", firstName: "Rossini", age: 36 },
-  { id: 9, lastName: "Roxie", firstName: "Harvey", age: 65 },
-];
+interface UserData {
+  userId: number;
+  name: string;
+  email: string;
+  password?: string; // Optional, as it might not be needed in the frontend
+  role: string;
+}
 
 const Customer = () => {
   const [openModal, setOpenModal] = useState(false);
+  const [rows, setRows] = useState<UserData[]>([]);
+
+  const fetchRows = async () => {
+    try {
+      const response = await fetch("http://localhost:5297/api/user");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data: UserData[] = await response.json();
+      // Rename userId to id
+      const rowsWithId = data.map((user) => ({
+        ...user,
+        id: user.userId, // Rename userId to id
+      }));
+      console.log(rowsWithId);
+      return rowsWithId;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      return []; // Return an empty array in case of error
+    }
+  };
+
+  const fetchDeleteRow = async (id: number) => {
+    try {
+      const response = await fetch(`http://localhost:5297/api/user/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
+      }
+      return response.ok;
+    } catch (error: any) {
+      console.error("Delete failed:", error);
+      throw error;
+    }
+  };
+
+  const refreshDataGrid = async () => {
+    const data = await fetchRows();
+    setRows(data);
+  };
+
+  useEffect(() => {
+    refreshDataGrid();
+  }, []);
 
   const handleAddCustomer = () => {
     console.log("Open Add Customer Modal");
     console.log(openModal);
     setOpenModal(true);
   };
+
+  const handleDeleteClick = async (id: GridRowId) => {
+    try {
+      await fetchDeleteRow(Number(id));
+      refreshDataGrid();
+    } catch (error) {
+      console.error("Failed to delete row:", error);
+    }
+  };
+
+  const columns: GridColDef[] = [
+    { field: "id", headerName: "ID", width: 100 },
+    { field: "name", headerName: "Name", width: 150 },
+    { field: "email", headerName: "Email", width: 150 },
+    { field: "role", headerName: "Role", type: "string", width: 150 },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
+      width: 100,
+      cellClassName: "actions",
+      getActions: ({ id }) => {
+        return [
+          <GridActionsCellItem
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={() => handleDeleteClick(id)}
+            color="error"
+          />,
+        ];
+      },
+    },
+  ];
 
   return (
     <Box sx={{ px: 4, py: 6 }}>
@@ -69,10 +138,11 @@ const Customer = () => {
         <DataGrid
           rows={rows}
           columns={columns}
-          // pageSize={5}
-          rowsPerPageOptions={[5, 10]}
+          // paginationModel={{ pageSize: 5, page:  }}
+          pagination
+          initialState={{ pagination: { paginationModel: { pageSize: 5 } } }}
+          pageSizeOptions={[5, 10, 25, 50, 100]}
           checkboxSelection
-          autoHeight={true}
           sx={{
             "& .MuiDataGrid-columnHeaders": {
               bgcolor: "secondary.main",
@@ -86,7 +156,11 @@ const Customer = () => {
       </Paper>
 
       {openModal && (
-        <ModalCustomer openModal={openModal} setOpenModal={setOpenModal} />
+        <ModalCustomer
+          openModal={openModal}
+          refreshData={refreshDataGrid}
+          setOpenModal={setOpenModal}
+        />
       )}
     </Box>
   );
