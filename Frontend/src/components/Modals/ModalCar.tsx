@@ -9,6 +9,7 @@ import {
   TextField,
   Typography,
   MenuItem,
+  SelectChangeEvent,
 } from "@mui/material";
 import { useState } from "react";
 
@@ -18,68 +19,67 @@ interface ModalCarProps {
   refreshData: () => void;
 }
 
-interface Car {
-  carId: number;
-  brand: string;
-  model: string;
-  color: string;
-  year: number;
-  licensePlate: string;
-  chassis: string;
-  fuel: string;
-  transmission: string;
-  category: string;
-  status: string;
-  image: string;
-}
-
 const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
-  const [formData, setFormData] = useState<Car>({
+  const [formData, setFormData] = useState({
     carId: 0,
     brand: "",
     model: "",
     color: "",
-    year: 0,
+    year: "",
     licensePlate: "",
     chassis: "",
+    fuel: "",
     transmission: "",
     category: "",
     status: "",
-    image: "",
-    fuel: "",
+    image: null as File | null,
+    createdBy: "",
   });
 
-  const handleChange = (event: any) => {
+  const handleChange = (
+    event:
+      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | SelectChangeEvent<string>
+  ) => {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const Url = "http://localhost:5297/api/";
-
-  const fetchAddCar = async () => {
-    try {
-      const response = await fetch(`${Url}Cars`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      const data = await response.json();
-      console.log("Car added successfully:", data);
-    } catch (error) {
-      console.error("Error adding car:", error);
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setFormData({ ...formData, image: file });
     }
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    console.log("Form Data Submitted:", formData);
-    fetchAddCar();
+  const fetchSaveCar = async (formData: FormData) => {
+    const response = await fetch("http://localhost:5297/api/car", {
+      method: "POST",
+      body: formData,
+    });
+    if (response.ok) {
+      console.log(response);
+      console.log("Car saved successfully");
+    } else {
+      console.error("Failed to save car");
+    }
     refreshData();
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    // Send data to the backend
+    const formDataSent = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined)
+        formDataSent.append(key, value instanceof File ? value : String(value));
+    });
+
+    fetchSaveCar(formDataSent);
+
+    // console.log("Form submitted:", formData);
+
+    setOpenModal(false);
   };
 
   return (
@@ -109,7 +109,7 @@ const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
           textAlign="center"
           mb={3}
         >
-          Register Car
+          Add or Edit Car
         </Typography>
 
         <Box
@@ -124,7 +124,7 @@ const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
           {/* First Row */}
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
             <TextField
-              name="Brand"
+              name="brand"
               label="Brand"
               variant="outlined"
               fullWidth
@@ -133,7 +133,7 @@ const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
               onChange={handleChange}
             />
             <TextField
-              name="Model"
+              name="model"
               label="Model"
               variant="outlined"
               fullWidth
@@ -145,23 +145,19 @@ const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
 
           {/* Second Row */}
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-            <FormControl fullWidth required>
-              <InputLabel>Color</InputLabel>
-              <Select
-                name="Color"
-                label="Color"
-                value={formData.color}
-                onChange={handleChange}
-              >
-                <MenuItem value="Red">Red</MenuItem>
-                <MenuItem value="Blue">Blue</MenuItem>
-                <MenuItem value="Black">Black</MenuItem>
-                <MenuItem value="White">White</MenuItem>
-              </Select>
-            </FormControl>
             <TextField
-              name="Year"
+              name="color"
+              label="Color"
+              variant="outlined"
+              fullWidth
+              required
+              value={formData.color}
+              onChange={handleChange}
+            />
+            <TextField
+              name="year"
               label="Year"
+              type="number"
               variant="outlined"
               fullWidth
               required
@@ -173,7 +169,7 @@ const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
           {/* Third Row */}
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
             <TextField
-              name="LicensePlate"
+              name="licensePlate"
               label="License Plate"
               variant="outlined"
               fullWidth
@@ -182,7 +178,7 @@ const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
               onChange={handleChange}
             />
             <TextField
-              name="Chassis"
+              name="chassis"
               label="Chassis"
               variant="outlined"
               fullWidth
@@ -195,56 +191,79 @@ const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
           {/* Fourth Row */}
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
             <FormControl fullWidth required>
+              <InputLabel>Fuel</InputLabel>
+              <Select
+                name="fuel"
+                label="Fuel"
+                value={formData.fuel}
+                onChange={handleChange}
+              >
+                <MenuItem value="Petrol">Petrol</MenuItem>
+                <MenuItem value="Diesel">Diesel</MenuItem>
+                <MenuItem value="Electric">Electric</MenuItem>
+                <MenuItem value="Hybrid">Hybrid</MenuItem>
+                <MenuItem value="LPG">LPG</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth required>
               <InputLabel>Transmission</InputLabel>
               <Select
-                name="Transmission"
+                name="transmission"
                 label="Transmission"
                 value={formData.transmission}
                 onChange={handleChange}
               >
-                <MenuItem value="Automatic">Automatic</MenuItem>
                 <MenuItem value="Manual">Manual</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth required>
-              <InputLabel>Category</InputLabel>
-              <Select
-                name="Category"
-                label="Category"
-                value={formData.category}
-                onChange={handleChange}
-              >
-                <MenuItem value="SUV">SUV</MenuItem>
-                <MenuItem value="Sedan">Sedan</MenuItem>
-                <MenuItem value="Truck">Truck</MenuItem>
+                <MenuItem value="Automatic">Automatic</MenuItem>
               </Select>
             </FormControl>
           </Stack>
 
           {/* Fifth Row */}
-          <Stack spacing={2}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
             <FormControl fullWidth required>
               <InputLabel>Status</InputLabel>
               <Select
-                name="Status"
+                name="status"
                 label="Status"
                 value={formData.status}
                 onChange={handleChange}
               >
                 <MenuItem value="Available">Available</MenuItem>
-                <MenuItem value="Unavailable">Unavailable</MenuItem>
+                <MenuItem value="Rented">Rented</MenuItem>
+                <MenuItem value="UnderMaintenance">Under Maintenance</MenuItem>
               </Select>
             </FormControl>
-            <Button variant="outlined" component="label" sx={{ flexGrow: 10 }}>
+            <TextField
+              name="category"
+              label="Category"
+              variant="outlined"
+              fullWidth
+              required
+              value={formData.category}
+              onChange={handleChange}
+            />
+          </Stack>
+
+          {/* Image Upload */}
+          <Stack spacing={2}>
+            <Button variant="outlined" component="label">
               Upload Image
-              <input type="file" hidden />
+              <input
+                type="file"
+                name="image"
+                onChange={handleImageChange}
+                accept="image/*"
+                hidden
+                required
+              />
             </Button>
           </Stack>
 
           {/* Action Buttons */}
           <Stack direction="row" spacing={2} mt={3}>
             <Button type="submit" variant="contained" fullWidth>
-              Register New Car
+              Submit
             </Button>
             <Button
               type="button"

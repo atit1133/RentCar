@@ -12,9 +12,11 @@ namespace rentCar.Services
     public class CarService : ICar
     {
         private readonly DbContextData _context;
-        public CarService(DbContextData context)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public CarService(DbContextData context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<List<Car>> GetCars()
@@ -47,9 +49,17 @@ namespace rentCar.Services
                 if (imageFile != null && imageFile.Length > 0)
                 {
                     // Define the folder where the images will be stored
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "UploadedImages");
+                    // var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploadimages");
+                    // var uploadsFolder = Path.Combine("uploadimages");
+                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploadimages");
+
                     if (!Directory.Exists(uploadsFolder))
                     {
+                        Console.WriteLine($"Uploads folder path: {uploadsFolder}");
+                        Console.WriteLine($"Current directory: {Directory.GetCurrentDirectory()}");
+
+
+
                         Directory.CreateDirectory(uploadsFolder);
                     }
 
@@ -64,7 +74,8 @@ namespace rentCar.Services
                     }
 
                     // Set the file path in the Car object
-                    car.Image = $"/UploadedImages/{uniqueFileName}";
+                    // car.Image = $"/UploadedImages/{uniqueFileName}";
+                    car.Image = $"/uploadimages/{uniqueFileName}";
                 }
 
                 await _context.Cars.AddAsync(car);
@@ -73,7 +84,7 @@ namespace rentCar.Services
             }
             catch (Exception)
             {
-                return null;
+                throw new Exception("Error adding car");
             }
         }
 
@@ -160,10 +171,10 @@ namespace rentCar.Services
             }
         }
 
-        public Task<Car?> AddCar(Car car)
-        {
-            throw new NotImplementedException();
-        }
+        // public Task<Car?> AddCar(Car car)
+        // {
+        //     throw new NotImplementedException();
+        // }
 
         public Task<bool> UpdateCar(Car car)
         {

@@ -16,9 +16,11 @@ namespace rentCar.Controllers
     public class CarController : Controller
     {
         private readonly ICar _car;   
-        public CarController(ICar car)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        public CarController(ICar car, IWebHostEnvironment webHostEnvironment)
         {
             _car = car;
+            _webHostEnvironment = webHostEnvironment;
             
         }
 
@@ -45,28 +47,49 @@ namespace rentCar.Controllers
             return Ok(car);
         }
 
-        [HttpPost("add-car")]
-        public async Task<IActionResult> AddCar([FromForm] Car car, [FromForm] IFormFile? imageFile)
-        {
-            var result = await _car.AddCar(car, imageFile);
-            if (result == null)
-            {
-                return BadRequest("Failed to add car.");
-            }
-            return Ok(result);
-        }
-
-
         [HttpPost]
-        public async Task<ActionResult<Car>> Post([FromBody] Car car)
+        public async Task<ActionResult> AddCar([FromForm] Car car, [FromForm] IFormFile? image)
         {
-            var newCar = await _car.AddCar(car);
-            if (newCar == null)
+            try
             {
-                return BadRequest();
+                // Log the received car object and image file for debugging
+                Console.WriteLine($"Car is: {System.Text.Json.JsonSerializer.Serialize(car)}");
+                Console.WriteLine($"Image is: {image?.FileName ?? "No image uploaded"}");
+
+                // Validate the car object
+                if (car == null || string.IsNullOrEmpty(car.Brand) || car.Year <= 0)
+                {
+                    return BadRequest("Invalid car data.");
+                }
+
+                // Call the service/repository method to save the car and image
+                var result = await _car.AddCar(car, image);
+                if (result == null)
+                {
+                    return BadRequest(new { Message = "Failed to add car." });
+                }
+
+                return Ok(result);
             }
-            return Ok(newCar);
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception: {ex.Message}");
+                return StatusCode(500, new { Message = "An error occurred while adding the car.", Error = ex.Message });
+            }
         }
+
+
+
+        // [HttpPost]
+        // public async Task<ActionResult<Car>> Post([FromBody] Car car)
+        // {
+        //     var newCar = await _car.AddCar(car);
+        //     if (newCar == null)
+        //     {
+        //         return BadRequest();
+        //     }
+        //     return Ok(newCar);
+        // }
 
         [HttpPut("{id}")]
         public async Task<ActionResult<bool>> Put(int id, [FromBody] Car car, [FromForm] IFormFile? imageFile)

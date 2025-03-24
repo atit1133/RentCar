@@ -24,6 +24,8 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<ICar, CarService>();
 builder.Services.AddScoped<IRential, RentialService>();
 builder.Services.AddScoped<IUser, UserService>();
+builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
+
 
 builder.Services.AddCors(options =>
 {
@@ -49,7 +51,15 @@ app.UseCors("AllowReactFrontend");
 
 app.UseHttpsRedirection();
 
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers.Append("Access-Control-Allow-Origin", "*");
+    }
+});
+
+
 
 
 app.MapControllers();

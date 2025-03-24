@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using rentCar.Data;
 
@@ -10,9 +11,11 @@ using rentCar.Data;
 namespace rentCar.Migrations
 {
     [DbContext(typeof(DbContextData))]
-    partial class DbContextDataModelSnapshot : ModelSnapshot
+    [Migration("20250324062326_AddCreatedByToCar")]
+    partial class AddCreatedByToCar
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
