@@ -7,9 +7,10 @@ import {
   ListItemAvatar,
   Avatar,
 } from "@mui/material";
+import { useEffect, useState } from "react";
 
 interface Car {
-  id: number;
+  carId: number;
   brand: string;
   model: string;
   image: string;
@@ -17,11 +18,13 @@ interface Car {
 
 interface Props {
   cars: Car[];
-  selectedCar: number;
+  selectedCar: number | null;
   onSelectCar: (carId: number) => void;
 }
 
 const CarList = ({ cars, selectedCar, onSelectCar }: Props) => {
+  const [listCar, setListCar] = useState<Car>();
+  console.log(listCar);
   return (
     <Box
       sx={{
@@ -31,16 +34,22 @@ const CarList = ({ cars, selectedCar, onSelectCar }: Props) => {
         bgcolor: "secondary.main",
       }}
     >
-      <Typography variant="h6">Car Inventory</Typography>
+      <Typography variant="h6">Car Inventory </Typography>
       <List>
         {cars.map((car) => (
           <ListItemButton
-            key={car.id}
-            selected={car.id === selectedCar}
-            onClick={() => onSelectCar(car.id)}
+            key={car.carId}
+            selected={car.carId === selectedCar}
+            onClick={() => {
+              onSelectCar(car.carId);
+              // setListCar(car);
+            }}
           >
             <ListItemAvatar>
-              <Avatar src={car.image} alt={car.brand} />
+              <Avatar
+                src={"http://localhost:5297" + car.image}
+                alt={car.brand}
+              />
             </ListItemAvatar>
             <ListItemText primary={car.brand} secondary={car.model} />
           </ListItemButton>

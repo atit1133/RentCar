@@ -1,38 +1,74 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import CarList from "../components/Booking/CarList";
 import CalendarView from "../components/Booking/CarlendarView";
 
-const cars = [
-  { id: 1, brand: "Toyota", model: "Corolla", image: "/path/to/image1.jpg" },
-  { id: 2, brand: "Honda", model: "Civic", image: "/path/to/image2.jpg" },
-  // Add more cars as needed
-];
+interface Car {
+  carId: number;
+  brand: string;
+  model: string;
+  image: string;
+}
 
-const events = [
-  {
-    title: "Rented",
-    start: new Date(2025, 2, 15),
-    end: new Date(2025, 2, 18),
-    carId: 1,
-  },
-  {
-    title: "Rented",
-    start: new Date(2025, 3, 20),
-    end: new Date(2025, 3, 22),
-    carId: 1,
-  },
-  // Add more events as needed
-];
+interface Event {
+  id: number;
+  title: string;
+  start: Date;
+  end: Date;
+  carId: number;
+  total: number;
+  startDate: Date;
+  endDate: Date;
+}
 
 const Booking = () => {
-  const [selectedCar, setSelectedCar] = useState(cars[0].id);
+  const [cars, setCars] = useState<Car[]>([]);
+  const [selectedCar, setSelectedCar] = useState<number | null>(null);
+  const [events, setEvents] = useState<Event[]>([]); // Specify the type of events
+
+  const fetchCars = async () => {
+    const response = await fetch("http://localhost:5297/api/car");
+    if (!response.ok) {
+      console.error("Failed to fetch cars");
+      return;
+    }
+    const data: Car[] = await response.json();
+    setCars(data);
+    if (data.length > 0) {
+      setSelectedCar(data[0].carId); // Use carId instead of id
+    }
+  };
 
   const handleSelectCar = (id: number): void => {
     setSelectedCar(id);
+    console.log("Selected :", id);
   };
 
-  const filteredEvents = events.filter((event) => event.carId === selectedCar);
+  useEffect(() => {
+    fetchCars();
+  }, []);
+
+  const fetchEvents = async () => {
+    if (!selectedCar) return; // Exit if no car is selected
+
+    const response = await fetch(
+      `http://localhost:5297/api/Rential/${selectedCar}` // Use selectedCar here
+    );
+    if (!response.ok) {
+      console.error("Failed to fetch events");
+      return;
+    }
+    const data: Event[] = await response.json(); // Specify the type of data
+    setEvents(data);
+  };
+
+  useEffect(() => {
+    fetchEvents();
+  }, [selectedCar]); // fetchEvents when selectedCar changes
+
+  useEffect(() => {
+    console.log("Events :", events); // Log events when they change
+  }, [events]);
 
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
@@ -41,8 +77,7 @@ const Booking = () => {
         selectedCar={selectedCar}
         onSelectCar={handleSelectCar}
       />
-      {/* <CalendarView events={filteredEvents} /> */}
-      <CalendarView events={filteredEvents} />
+      <CalendarView selectedCar={selectedCar} events={events} />
     </Box>
   );
 };

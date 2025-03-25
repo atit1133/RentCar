@@ -6,20 +6,66 @@ import { Button, Typography, Box, Paper } from "@mui/material";
 import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 
-interface Value {
-  startRent: Dayjs | null;
-  endRent: Dayjs | null;
-}
+type Rental = {
+  rentialId: number;
+  userId: number;
+  carId: number;
+  startDate: Dayjs | null;
+  endDate: Dayjs | null;
+  status: string;
+  total: number;
+  paymentMethod: string;
+};
 
-export default function ModernDatePicker() {
-  const [value, setValue] = useState<Value>({
-    startRent: null,
-    endRent: null,
-  });
+const initDatavalue: Rental = {
+  rentialId: 0,
+  userId: 0,
+  carId: 0,
+  startDate: null,
+  endDate: null,
+  status: "Rented",
+  total: 0,
+  paymentMethod: "Cash",
+};
+
+export default function ModernDatePicker({ bookingId }: { bookingId: number }) {
+  const [value, setValue] = useState<Rental>(initDatavalue);
+
+  const handleSave = async () => {
+    const { carId, ...rest } = value;
+    const data = {
+      ...rest,
+      carId: bookingId,
+      total: value.endDate && value.startDate ? countDate * 2000 : 0,
+    };
+    console.log("Save", data); // Log the data
+
+    // Add your logic here to send the data to the backend
+    try {
+      const response = await fetch("http://localhost:5297/api/Rential", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to save rental (Status: ${response.status})`);
+      }
+
+      const result = await response.json();
+      console.log("Rental saved successfully:", result);
+      // ... Handle success (e.g., show success message)
+    } catch (error) {
+      console.error("Failed to save rental:", error);
+      // ... Handle error (e.g., show error message)
+    }
+  };
 
   const countDate =
-    value.startRent && value.endRent
-      ? dayjs(value.endRent).diff(dayjs(value.startRent), "day") + 1
+    value.startDate && value.endDate
+      ? dayjs(value.endDate).diff(dayjs(value.startDate), "day") + 1
       : 0;
 
   return (
@@ -46,7 +92,7 @@ export default function ModernDatePicker() {
         <DemoContainer components={["DatePicker"]}>
           <DatePicker
             onChange={(newValue: Dayjs | null) =>
-              setValue((prev) => ({ ...prev, startRent: newValue }))
+              setValue((prev) => ({ ...prev, startDate: newValue }))
             }
             name="startRent"
             label="Start Date Rental"
@@ -59,7 +105,7 @@ export default function ModernDatePicker() {
           />
           <DatePicker
             onChange={(newValue: Dayjs | null) =>
-              setValue((prev) => ({ ...prev, endRent: newValue }))
+              setValue((prev) => ({ ...prev, endDate: newValue }))
             }
             name="endRent"
             label="End Date Rental"
@@ -98,9 +144,11 @@ export default function ModernDatePicker() {
             </Typography>
           )}
         </Box>
+
         <Button
           variant="contained"
           color="primary"
+          onClick={handleSave}
           fullWidth
           sx={{
             mt: 3,

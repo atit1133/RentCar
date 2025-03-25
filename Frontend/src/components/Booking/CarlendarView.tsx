@@ -7,14 +7,21 @@ import ModalRangBooking from "../Modals/ModalRangBooking";
 import ListCustomer from "../common/ListCustomer";
 
 interface Event {
-  title: string;
-  start: Date;
-  end: Date;
+  total: number;
+  startDate: Date;
+  endDate: Date;
 }
 
-const CalendarView = ({ events }: { events: Event[] }) => {
+const CalendarView = ({
+  events,
+  selectedCar,
+}: {
+  events: Event[];
+  selectedCar: number | null;
+}) => {
   const [isModal, setIsModal] = useState(false);
   // const [selectedEvent, setSelectedEvent] = useState(null);
+  console.log("Select  Car Booking :", selectedCar);
 
   return (
     <Box sx={{ p: 2 }}>
@@ -23,9 +30,9 @@ const CalendarView = ({ events }: { events: Event[] }) => {
         plugins={[dayGridPlugin]}
         initialView="dayGridMonth"
         events={events.map((event) => ({
-          title: event.title,
-          start: event.start,
-          end: event.end,
+          title: event.total.toString(),
+          start: event.startDate,
+          end: event.endDate,
         }))}
         headerToolbar={{
           left: "prev,next today,customBooking",
@@ -71,7 +78,7 @@ const CalendarView = ({ events }: { events: Event[] }) => {
           >
             <Typography variant="h6">Booking Car</Typography>
             <ListCustomer />
-            <ModalRangBooking />
+            <ModalRangBooking bookingId={Number(selectedCar)} />
           </Box>
         </Modal>
       )}
