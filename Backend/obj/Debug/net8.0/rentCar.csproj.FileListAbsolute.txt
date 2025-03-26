@@ -209,3 +209,4 @@ C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\obj\Debug\n
 C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\obj\Debug\net8.0\rentCar.pdb
 C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\obj\Debug\net8.0\rentCar.genruntimeconfig.cache
 C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\obj\Debug\net8.0\ref\rentCar.dll
+C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\bin\Debug\net8.0\rentCar.staticwebassets.runtime.json

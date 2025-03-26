@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using rentCar.Data;
 using rentCar.Interfaces;
 using rentCar.Models;
-using rentCar.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace rentCar.Services
 {
@@ -13,6 +16,7 @@ namespace rentCar.Services
     {
         private readonly DbContextData _context;
         private readonly IWebHostEnvironment _webHostEnvironment;
+
         public CarService(DbContextData context, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
@@ -22,25 +26,12 @@ namespace rentCar.Services
         public async Task<List<Car>> GetCars()
         {
             return await _context.Cars.ToListAsync();
-           
-        }
-        public async Task<Car?> GetCarById(int carId)
-        {
-           var  car = await _context.Cars.FindAsync(carId);
-           return car;
         }
 
-        // public async Task<Car?> AddCar(Car car)
-        // {
-        //     try{
-        //         await _context.Cars.AddAsync(car);
-        //         await _context.SaveChangesAsync();
-        //         return car;
-        //     }catch (Exception)
-        //     {
-        //         return null;
-        //     }
-        // }
+        public async Task<Car?> GetCarById(int carId)
+        {
+            return await _context.Cars.FindAsync(carId);
+        }
 
         public async Task<Car> AddCar(Car car, IFormFile? imageFile)
         {
@@ -48,64 +39,19 @@ namespace rentCar.Services
             {
                 if (imageFile != null && imageFile.Length > 0)
                 {
-                    // Define the folder where the images will be stored
-                    // var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploadimages");
-                    // var uploadsFolder = Path.Combine("uploadimages");
-                    var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploadimages");
-
-                    if (!Directory.Exists(uploadsFolder))
-                    {
-                        Console.WriteLine($"Uploads folder path: {uploadsFolder}");
-                        Console.WriteLine($"Current directory: {Directory.GetCurrentDirectory()}");
-
-
-
-                        Directory.CreateDirectory(uploadsFolder);
-                    }
-
-                    // Generate a unique filename for the uploaded image
-                    var uniqueFileName = $"{Guid.NewGuid()}_{imageFile.FileName}";
-                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                    // Save the file
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await imageFile.CopyToAsync(stream);
-                    }
-
-                    // Set the file path in the Car object
-                    // car.Image = $"/UploadedImages/{uniqueFileName}";
-                    car.Image = $"/uploadimages/{uniqueFileName}";
+                    car.Image = await SaveImageAsync(imageFile);
                 }
 
                 await _context.Cars.AddAsync(car);
                 await _context.SaveChangesAsync();
                 return car;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw new Exception("Error adding car");
+                throw new Exception("Error adding car: " + ex.Message);
             }
         }
 
-
-        // public async Task<bool> UpdateCar(Car car)
-        // {
-        //     try{
-        //         var existingCar = await _context.Cars.FirstOrDefaultAsync(cars=> cars.CarId == car.CarId);
-        //         if (existingCar == null)
-        //         {
-        //             return false;
-        //         }
-        //         _context.Entry(existingCar).CurrentValues.SetValues(car);
-        //         await _context.SaveChangesAsync();
-        //         return true;
-        //     }catch (Exception)
-        //     {
-        //         return false;
-        //     }
-           
-        // }
         public async Task<bool> UpdateCar(Car car, IFormFile? imageFile)
         {
             try
@@ -118,67 +64,81 @@ namespace rentCar.Services
 
                 if (imageFile != null && imageFile.Length > 0)
                 {
-                    // Define the folder where the images will be stored
-                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "UploadedImages");
-                    if (!Directory.Exists(uploadsFolder))
+                    // Delete old image before saving a new one
+                    if (!string.IsNullOrEmpty(existingCar.Image))
                     {
-                        Directory.CreateDirectory(uploadsFolder);
+                        DeleteImage(existingCar.Image);
                     }
 
-                    // Generate a unique filename for the uploaded image
-                    var uniqueFileName = $"{Guid.NewGuid()}_{imageFile.FileName}";
-                    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                    // Save the file
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await imageFile.CopyToAsync(stream);
-                    }
-
-                    // Update the file path in the Car object
-                    existingCar.Image = $"/UploadedImages/{uniqueFileName}";
+                    existingCar.Image = await SaveImageAsync(imageFile);
                 }
 
-                // Update other car details
                 _context.Entry(existingCar).CurrentValues.SetValues(car);
-
                 await _context.SaveChangesAsync();
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return false;
+                throw new Exception("Error updating car: " + ex.Message);
             }
         }
-
 
         public async Task<bool> DeleteCar(int carId)
         {
-            try{
-                var carFetch = await _context.Cars.FindAsync(carId);
-                if(carFetch == null)
+            try
+            {
+                var car = await _context.Cars.FindAsync(carId);
+                if (car == null)
                 {
                     return false;
                 }
-                _context.Cars.Remove(carFetch);
+
+                // Delete the car's image from storage
+                if (!string.IsNullOrEmpty(car.Image))
+                {
+                    DeleteImage(car.Image);
+                }
+
+                _context.Cars.Remove(car);
                 await _context.SaveChangesAsync();
                 return true;
-                
-            }catch (Exception)
+            }
+            catch (Exception ex)
             {
-                return false;
-                
+                throw new Exception("Error deleting car: " + ex.Message);
             }
         }
 
-        // public Task<Car?> AddCar(Car car)
-        // {
-        //     throw new NotImplementedException();
-        // }
-
-        public Task<bool> UpdateCar(Car car)
+        // 👇 Helper method to save image
+        private async Task<string> SaveImageAsync(IFormFile imageFile)
         {
-            throw new NotImplementedException();
+            string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploadimages");
+
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            string uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(imageFile.FileName)}";
+            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await imageFile.CopyToAsync(stream);
+            }
+
+            return $"/uploadimages/{uniqueFileName}"; // Relative path for serving via static files
+        }
+
+        // 👇 Helper method to delete an image
+        private void DeleteImage(string imagePath)
+        {
+            string fullPath = Path.Combine(_webHostEnvironment.WebRootPath, imagePath.TrimStart('/'));
+
+            if (File.Exists(fullPath))
+            {
+                File.Delete(fullPath);
+            }
         }
     }
 }

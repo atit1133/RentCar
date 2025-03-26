@@ -5,6 +5,8 @@ import "./style.css";
 import { useState } from "react";
 import ModalRangBooking from "../Modals/ModalRangBooking";
 import ListCustomer from "../common/ListCustomer";
+import ModalCustomer from "../Modals/ModalCustomer";
+import Customer from "../../pages/Customer";
 
 interface Event {
   total: number;
@@ -77,8 +79,12 @@ const CalendarView = ({
             }}
           >
             <Typography variant="h6">Booking Car</Typography>
-            <ListCustomer />
-            <ModalRangBooking bookingId={Number(selectedCar)} />
+            {/* <ListCustomer /> */}
+            <Customer />
+            <ModalRangBooking
+              closeModal={() => setIsModal(false)}
+              bookingId={Number(selectedCar)}
+            />
           </Box>
         </Modal>
       )}

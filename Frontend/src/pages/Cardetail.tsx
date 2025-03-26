@@ -146,6 +146,9 @@ const Cardetail = () => {
                 Price
               </TableCell>
               <TableCell sx={{ fontWeight: "bold", color: "primary.main" }}>
+                Status
+              </TableCell>
+              <TableCell sx={{ fontWeight: "bold", color: "primary.main" }}>
                 Actions
               </TableCell>
             </TableRow>
@@ -155,7 +158,7 @@ const Cardetail = () => {
               <TableRow key={car.carId} hover>
                 <TableCell>
                   <Avatar
-                    src={car.image}
+                    src={"http://localhost:5297" + car.image}
                     alt={car.brand}
                     variant="square"
                     sx={{ width: 60, height: 60, borderRadius: 1 }}
@@ -164,6 +167,11 @@ const Cardetail = () => {
                 <TableCell>
                   <Typography variant="body1" fontWeight="medium">
                     {car.model}
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="body1" fontWeight="medium">
+                    2,000 Bath/Day
                   </Typography>
                 </TableCell>
                 <TableCell>

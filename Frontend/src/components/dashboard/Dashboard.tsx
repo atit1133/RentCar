@@ -17,26 +17,26 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
 } from "recharts";
+import { PieChart, Pie, Cell } from "recharts";
 
-// Data remains unchanged
-const carRentalData = [
-  { month: "Jan", rentals: 120, revenue: 6000 },
-  { month: "Feb", rentals: 150, revenue: 7500 },
-  { month: "Mar", rentals: 180, revenue: 9000 },
-  { month: "Apr", rentals: 200, revenue: 10000 },
-  { month: "May", rentals: 220, revenue: 11000 },
-  { month: "Jun", rentals: 250, revenue: 12500 },
-  { month: "Jul", rentals: 230, revenue: 11500 },
-  { month: "Aug", rentals: 210, revenue: 10500 },
-  { month: "Sep", rentals: 190, revenue: 9500 },
-  { month: "Oct", rentals: 170, revenue: 8500 },
-  { month: "Nov", rentals: 140, revenue: 7000 },
-  { month: "Dec", rentals: 160, revenue: 8000 },
-];
+import {
+  apiReportTotalRent,
+  apiReportTotalRevenue,
+  apiReportTotalSales,
+  apiReportTotalRentals,
+} from "../../api/api";
+
+interface MonthlyRentalData {
+  startDate: string; // ISO 8601 format (e.g., "2024-01-01T00:00:00")
+  total: number;
+}
+
+interface FullReport {
+  total: number;
+}
+
+const COLORS = ["#4CAF50", "#FF5722", "#3F51B5", "#FFC107"];
 
 const carTypeData = [
   { name: "Sedan", value: 400 },
@@ -44,20 +44,111 @@ const carTypeData = [
   { name: "Hatchback", value: 200 },
   { name: "Truck", value: 100 },
 ];
-const COLORS = ["#4CAF50", "#FF5722", "#3F51B5", "#FFC107"];
+
+const currentYear = new Date().getFullYear();
+const currentMonth = new Date().getMonth() + 1; // Months are 0-indexed
 
 const Dashboard = () => {
   const [totalRentals, setTotalRentals] = useState(0);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [averageRevenue, setAverageRevenue] = useState(0);
+  const [monthlyRentalData, setMonthlyRentalData] = useState<
+    MonthlyRentalData[]
+  >([]);
+  const [fullReport, setFullReport] = useState<FullReport>();
+
+  const fetchTotalRentals = async () => {
+    const response = await apiReportTotalRent("totalRentals");
+    const total = response.reduce((sum: number, data: number) => sum + data, 0);
+    setTotalRentals(total);
+  };
+  const fetchTotalRevenue = async () => {
+    const response = await apiReportTotalRevenue("totalRevenue");
+    const total = response.reduce((sum: number, data: number) => sum + data, 0);
+    setTotalRevenue(total);
+  };
+  const fetchTotalAvg = async () => {
+    const response = await apiReportTotalSales("totalSales");
+    const total = response.reduce((sum: number, data: number) => sum + data, 0);
+    setAverageRevenue(total / response.length);
+  };
+  const fetchMonthly = async () => {
+    const response: MonthlyRentalData[] = await apiReportTotalRentals(
+      `rential/report/${currentYear}/${currentMonth}`
+    );
+
+    setFullReport(response);
+    // setMonthlyRentalData(response);
+  };
+
+  const fetchMonthlyRentalData = async () => {
+    try {
+      const response: MonthlyRentalData[] = await apiReportTotalRent(
+        "Rential/report"
+      );
+      // Sort the data by StartDate (chronologically)
+      const sortedData = response.sort((a, b) => {
+        return (
+          new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+        );
+      });
+      setMonthlyRentalData(sortedData);
+    } catch (error) {
+      console.error("Error fetching monthly rental data:", error);
+    }
+  };
+
+  const monthlyFullReport =
+    fullReport.map((item) => ({
+      Count: item.total.length, // If item.total is an array, use `.length` to get the count.
+      SumAmount: item.total.reduce(
+        (sum: number, data: number) => sum + data,
+        0
+      ), // This calculates the sum.
+      AvgAmount:
+        item.total.reduce((sum: number, data: number) => sum + data, 0) /
+        item.total.length, // Divide the sum by the count for average.
+    })) || [];
 
   useEffect(() => {
-    const rentals = carRentalData.reduce((sum, data) => sum + data.rentals, 0);
-    const revenue = carRentalData.reduce((sum, data) => sum + data.revenue, 0);
-    setTotalRentals(rentals);
-    setTotalRevenue(revenue);
-    setAverageRevenue(revenue / carRentalData.length);
+    // fetchTotalRentals();
+    // fetchTotalRevenue();
+    // fetchTotalAvg();
+    fetchMonthlyRentalData();
+    fetchMonthly();
   }, []);
+
+  const carRentalData = monthlyRentalData
+    .map((item) => ({
+      month: new Date(item.startDate).toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      }),
+      rentals: item.total,
+      revenue: item.total,
+    }))
+    .sort((a, b) => {
+      const monthOrder: { [key: string]: number } = {
+        Jan: 0,
+        Feb: 1,
+        Mar: 2,
+        Apr: 3,
+        May: 4,
+        Jun: 5,
+        Jul: 6,
+        Aug: 7,
+        Sep: 8,
+        Oct: 9,
+        Nov: 10,
+        Dec: 11,
+      };
+      const monthA = a.month.substring(0, 3);
+      const monthB = b.month.substring(0, 3);
+      return monthOrder[monthA] - monthOrder[monthB];
+    });
+
+  // console.log(monthlyRentalData);
+  console.log(monthlyFullReport);
 
   return (
     <Box sx={{ px: 4, py: 6, bgcolor: "#f9f9f9", minHeight: "100vh" }}>

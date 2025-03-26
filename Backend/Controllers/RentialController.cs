@@ -28,10 +28,24 @@ namespace rentCar.Controllers
             return Ok(rentials);
             
         }
+        [HttpGet("report")]
+        public async Task<ActionResult<List<Rential>>> GetReport()
+        {
+            var rentials = await _rential.GetRentialReportTotalMount();
+            return Ok(rentials);
+            
+        }
+        [HttpGet("report/{year}/{month}")]
+        public async Task<ActionResult<List<Rential>>> GetReportByMonth(int year, int month)
+        {
+            var rentials = await _rential.GetRentialReportTotalCurrentMount(year, month);
+            return Ok(rentials);
+            
+        }
         [HttpGet("{id}")]
         public async Task<ActionResult<Rential>> Get(int id)
         {
-            var CarFetch = await _rential.GetRentilById(id);
+            var CarFetch = await _rential.GetRentilsByCarId(id);
             if(CarFetch != null){
                 return Ok(CarFetch);
             }

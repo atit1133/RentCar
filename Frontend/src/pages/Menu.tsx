@@ -56,7 +56,7 @@ const Menu: React.FC = () => {
         ))}
       </List>
       <Divider />
-      <List>
+      {/* <List>
         <ListItem disablePadding>
           <ListItemButton onClick={handleMenu}>
             <ListItemIcon>
@@ -65,7 +65,7 @@ const Menu: React.FC = () => {
             <ListItemText primary="DashBoard" />
           </ListItemButton>
         </ListItem>
-      </List>
+      </List> */}
     </Box>
   );
 

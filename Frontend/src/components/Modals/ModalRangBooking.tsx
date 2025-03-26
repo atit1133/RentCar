@@ -28,7 +28,13 @@ const initDatavalue: Rental = {
   paymentMethod: "Cash",
 };
 
-export default function ModernDatePicker({ bookingId }: { bookingId: number }) {
+export default function ModernDatePicker({
+  bookingId,
+  closeModal,
+}: {
+  bookingId: number;
+  closeModal: () => void;
+}) {
   const [value, setValue] = useState<Rental>(initDatavalue);
 
   const handleSave = async () => {
@@ -61,6 +67,7 @@ export default function ModernDatePicker({ bookingId }: { bookingId: number }) {
       console.error("Failed to save rental:", error);
       // ... Handle error (e.g., show error message)
     }
+    closeModal();
   };
 
   const countDate =
