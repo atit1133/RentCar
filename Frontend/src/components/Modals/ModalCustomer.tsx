@@ -7,7 +7,10 @@ import {
   OutlinedInput,
   Stack,
   Typography,
-  Alert, // Import Alert
+  Alert,
+  Select,
+  MenuItem,
+  FormHelperText,
 } from "@mui/material";
 import { useState } from "react";
 
@@ -21,11 +24,11 @@ interface UserForm {
 const ModalCustomer = ({
   openModal,
   setOpenModal,
-  refreshData, // Add refreshData prop
+  refreshData,
 }: {
   openModal: boolean;
   setOpenModal: (value: boolean) => void;
-  refreshData: () => void; // Add refreshData type
+  refreshData: () => void;
 }) => {
   const [formData, setFormData] = useState<UserForm>({
     name: "",
@@ -33,12 +36,54 @@ const ModalCustomer = ({
     password: "",
     role: "",
   });
-  const [error, setError] = useState<string | null>(null); // State for error messages
-  const [success, setSuccess] = useState<boolean>(false); // State for success message
+  const [errors, setErrors] = useState<{ [key: string]: string | null }>({
+    name: null,
+    email: null,
+    role: null,
+  });
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<boolean>(false);
+
+  const validateForm = (): boolean => {
+    let isValid = true;
+    const newErrors = { ...errors };
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
+      isValid = false;
+    } else {
+      newErrors.name = null;
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Email is invalid";
+      isValid = false;
+    } else {
+      newErrors.email = null;
+    }
+
+    if (!formData.role) {
+      newErrors.role = "Role is required";
+      isValid = false;
+    } else {
+      newErrors.role = null;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
 
   const handleRegister = async () => {
-    setError(null); // Clear previous errors
-    setSuccess(false); // Clear previous success
+    setApiError(null); // Clear previous API errors
+    setSuccess(false);
+    // setErrors({ name: null, email: null, role: null }); // Clear previous field errors
+
+    if (!validateForm()) {
+      return; // Stop submission if validation fails
+    }
 
     try {
       const response = await fetch("http://localhost:5297/api/user", {
@@ -46,7 +91,7 @@ const ModalCustomer = ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData), // Correct placement of body
+        body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
@@ -59,18 +104,12 @@ const ModalCustomer = ({
       const data = await response.json();
       console.log("Registration successful:", data);
       setSuccess(true);
-      // Reset the form
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        role: "",
-      });
+      setFormData({ name: "", email: "", password: "", role: "" });
       setOpenModal(false);
-      refreshData(); // Refresh data in DataGrid
+      refreshData();
     } catch (error: any) {
       console.error("Registration failed:", error);
-      setError(error.message || "An error occurred during registration.");
+      setApiError(error.message || "An error occurred during registration.");
     }
   };
 
@@ -104,33 +143,41 @@ const ModalCustomer = ({
         >
           Register Customer
         </Typography>
-        {error && <Alert severity="error">{error}</Alert>}
+        {apiError && <Alert severity="error">{apiError}</Alert>}
         {success && <Alert severity="success">Register successful!</Alert>}
 
         <Stack spacing={3}>
-          <FormControl variant="outlined" fullWidth>
+          <FormControl variant="outlined" fullWidth error={!!errors.name}>
             <InputLabel htmlFor="name-input">Name</InputLabel>
             <OutlinedInput
               id="name-input"
               name="name"
               label="Name"
-              value={formData.name} // Add value
+              value={formData.name}
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
+              required
             />
+            {errors.name && (
+              <FormHelperText error>{errors.name}</FormHelperText>
+            )}
           </FormControl>
-          <FormControl variant="outlined" fullWidth>
+          <FormControl variant="outlined" fullWidth error={!!errors.email}>
             <InputLabel htmlFor="email-input">Email</InputLabel>
             <OutlinedInput
               id="email-input"
               name="email"
               label="Email"
-              value={formData.email} // Add value
+              value={formData.email}
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
+              required
             />
+            {errors.email && (
+              <FormHelperText error>{errors.email}</FormHelperText>
+            )}
           </FormControl>
           <FormControl variant="outlined" fullWidth>
             <InputLabel htmlFor="password-input">Password</InputLabel>
@@ -139,23 +186,30 @@ const ModalCustomer = ({
               name="password"
               label="Password"
               type="password"
-              value={formData.password} // Add value
+              value={formData.password}
               onChange={(e) =>
                 setFormData({ ...formData, password: e.target.value })
               }
             />
           </FormControl>
-          <FormControl variant="outlined" fullWidth>
+
+          <FormControl fullWidth error={!!errors.role}>
             <InputLabel htmlFor="role-input">Role</InputLabel>
-            <OutlinedInput
+            <Select
               id="role-input"
               name="role"
-              label="Role"
-              value={formData.role} // Add value
+              value={formData.role}
               onChange={(e) =>
-                setFormData({ ...formData, role: e.target.value })
+                setFormData({ ...formData, role: e.target.value as string })
               }
-            />
+              label="Role"
+            >
+              <MenuItem value="user">User</MenuItem>
+              <MenuItem value="admin">Admin</MenuItem>
+            </Select>
+            {errors.role && (
+              <FormHelperText error>{errors.role}</FormHelperText>
+            )}
           </FormControl>
         </Stack>
 

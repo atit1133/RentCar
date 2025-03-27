@@ -10,6 +10,8 @@ import {
   Typography,
   MenuItem,
   SelectChangeEvent,
+  FormHelperText,
+  Alert,
 } from "@mui/material";
 import { useState } from "react";
 
@@ -36,6 +38,128 @@ const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
     createdBy: "",
   });
 
+  const [errors, setErrors] = useState<{ [key: string]: string | null }>({
+    brand: null,
+    model: null,
+    color: null,
+    year: null,
+    licensePlate: null,
+    chassis: null,
+    fuel: null,
+    transmission: null,
+    category: null,
+    status: null,
+    image: null,
+  });
+  const [imageError, setImageError] = useState<string | null>(null);
+
+  const validateForm = (): boolean => {
+    let isValid = true;
+    const newErrors = { ...errors };
+
+    // Validate Brand
+    if (!formData.brand.trim()) {
+      newErrors.brand = "Brand is required";
+      isValid = false;
+    } else {
+      newErrors.brand = null;
+    }
+
+    // Validate Model
+    if (!formData.model.trim()) {
+      newErrors.model = "Model is required";
+      isValid = false;
+    } else {
+      newErrors.model = null;
+    }
+
+    // Validate Color
+    if (!formData.color.trim()) {
+      newErrors.color = "Color is required";
+      isValid = false;
+    } else {
+      newErrors.color = null;
+    }
+
+    // Validate Year
+    if (!formData.year.trim()) {
+      newErrors.year = "Year is required";
+      isValid = false;
+    } else if (
+      isNaN(Number(formData.year)) ||
+      Number(formData.year) < 1900 ||
+      Number(formData.year) > new Date().getFullYear() + 1
+    ) {
+      newErrors.year =
+        "Year must be a number between 1900 and current year + 1";
+      isValid = false;
+    } else {
+      newErrors.year = null;
+    }
+
+    // Validate License Plate
+    if (!formData.licensePlate.trim()) {
+      newErrors.licensePlate = "License Plate is required";
+      isValid = false;
+    } else {
+      newErrors.licensePlate = null;
+    }
+
+    // Validate Chassis
+    if (!formData.chassis.trim()) {
+      newErrors.chassis = "Chassis is required";
+      isValid = false;
+    } else {
+      newErrors.chassis = null;
+    }
+
+    // Validate Fuel
+    if (!formData.fuel) {
+      newErrors.fuel = "Fuel is required";
+      isValid = false;
+    } else {
+      newErrors.fuel = null;
+    }
+
+    // Validate Transmission
+    if (!formData.transmission) {
+      newErrors.transmission = "Transmission is required";
+      isValid = false;
+    } else {
+      newErrors.transmission = null;
+    }
+
+    // Validate Category
+    if (!formData.category.trim()) {
+      newErrors.category = "Category is required";
+      isValid = false;
+    } else {
+      newErrors.category = null;
+    }
+
+    // Validate Status
+    if (!formData.status) {
+      newErrors.status = "Status is required";
+      isValid = false;
+    } else {
+      newErrors.status = null;
+    }
+
+    // Validate Image
+    if (!formData.image) {
+      newErrors.image = "Image is required";
+      isValid = false;
+    } else if (!formData.image.type.startsWith("image/")) {
+      newErrors.image = "File must be an image";
+      isValid = false;
+    } else {
+      newErrors.image = null;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleChange = (
     event:
       | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -49,25 +173,38 @@ const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
     const file = event.target.files?.[0];
     if (file) {
       setFormData({ ...formData, image: file });
+      setErrors({ ...errors, image: null }); // Clear image error when a file is selected
+      setImageError(null);
     }
   };
 
   const fetchSaveCar = async (formData: FormData) => {
-    const response = await fetch("http://localhost:5297/api/car", {
-      method: "POST",
-      body: formData,
-    });
-    if (response.ok) {
-      console.log(response);
-      console.log("Car saved successfully");
-    } else {
-      console.error("Failed to save car");
+    try {
+      const response = await fetch("http://localhost:5297/api/car", {
+        method: "POST",
+        body: formData,
+      });
+      if (response.ok) {
+        console.log(response);
+        console.log("Car saved successfully");
+      } else {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || `HTTP error! status: ${response.status}`
+        );
+      }
+      refreshData();
+    } catch (error: any) {
+      console.error("Failed to save car", error);
+      setImageError(error.message || "Failed to save car");
     }
-    refreshData();
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
     // Send data to the backend
     const formDataSent = new FormData();
     Object.entries(formData).forEach(([key, value]) => {
@@ -109,8 +246,9 @@ const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
           textAlign="center"
           mb={3}
         >
-          Add or Edit Car
+          Add Car
         </Typography>
+        {imageError && <Alert severity="error">{imageError}</Alert>}
 
         <Box
           component="form"
@@ -123,74 +261,104 @@ const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
         >
           {/* First Row */}
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-            <TextField
-              name="brand"
-              label="Brand"
-              variant="outlined"
-              fullWidth
-              required
-              value={formData.brand}
-              onChange={handleChange}
-            />
-            <TextField
-              name="model"
-              label="Model"
-              variant="outlined"
-              fullWidth
-              required
-              value={formData.model}
-              onChange={handleChange}
-            />
+            <FormControl fullWidth error={!!errors.brand}>
+              <TextField
+                name="brand"
+                label="Brand"
+                variant="outlined"
+                fullWidth
+                required
+                value={formData.brand}
+                onChange={handleChange}
+              />
+              {errors.brand && (
+                <FormHelperText error>{errors.brand}</FormHelperText>
+              )}
+            </FormControl>
+            <FormControl fullWidth error={!!errors.model}>
+              <TextField
+                name="model"
+                label="Model"
+                variant="outlined"
+                fullWidth
+                required
+                value={formData.model}
+                onChange={handleChange}
+              />
+              {errors.model && (
+                <FormHelperText error>{errors.model}</FormHelperText>
+              )}
+            </FormControl>
           </Stack>
 
           {/* Second Row */}
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-            <TextField
-              name="color"
-              label="Color"
-              variant="outlined"
-              fullWidth
-              required
-              value={formData.color}
-              onChange={handleChange}
-            />
-            <TextField
-              name="year"
-              label="Year"
-              type="number"
-              variant="outlined"
-              fullWidth
-              required
-              value={formData.year}
-              onChange={handleChange}
-            />
+            <FormControl fullWidth error={!!errors.color}>
+              <TextField
+                name="color"
+                label="Color"
+                variant="outlined"
+                fullWidth
+                required
+                value={formData.color}
+                onChange={handleChange}
+              />
+              {errors.color && (
+                <FormHelperText error>{errors.color}</FormHelperText>
+              )}
+            </FormControl>
+            <FormControl fullWidth error={!!errors.year}>
+              <TextField
+                name="year"
+                label="Year"
+                type="number"
+                variant="outlined"
+                fullWidth
+                required
+                value={formData.year}
+                onChange={handleChange}
+              />
+              {errors.year && (
+                <FormHelperText error>{errors.year}</FormHelperText>
+              )}
+            </FormControl>
           </Stack>
 
           {/* Third Row */}
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-            <TextField
-              name="licensePlate"
-              label="License Plate"
-              variant="outlined"
-              fullWidth
-              required
-              value={formData.licensePlate}
-              onChange={handleChange}
-            />
-            <TextField
-              name="chassis"
-              label="Chassis"
-              variant="outlined"
-              fullWidth
-              required
-              value={formData.chassis}
-              onChange={handleChange}
-            />
+            <FormControl fullWidth error={!!errors.licensePlate}>
+              <TextField
+                name="licensePlate"
+                label="License Plate"
+                variant="outlined"
+                fullWidth
+                required
+                value={formData.licensePlate}
+                onChange={handleChange}
+              />
+              {errors.licensePlate && (
+                <FormHelperText error>{errors.licensePlate}</FormHelperText>
+              )}
+            </FormControl>
+            <FormControl fullWidth error={!!errors.chassis}>
+              <TextField
+                name="chassis"
+                label="Chassis"
+                variant="outlined"
+                fullWidth
+                required
+                value={formData.chassis}
+                onChange={handleChange}
+              />
+              {errors.chassis && (
+                <FormHelperText error>{errors.chassis}</FormHelperText>
+              )}
+            </FormControl>
           </Stack>
 
           {/* Fourth Row */}
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-            <FormControl fullWidth required>
+            <FormControl fullWidth required error={!!errors.fuel}>
               <InputLabel>Fuel</InputLabel>
               <Select
                 name="fuel"
@@ -204,8 +372,11 @@ const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
                 <MenuItem value="Hybrid">Hybrid</MenuItem>
                 <MenuItem value="LPG">LPG</MenuItem>
               </Select>
+              {errors.fuel && (
+                <FormHelperText error>{errors.fuel}</FormHelperText>
+              )}
             </FormControl>
-            <FormControl fullWidth required>
+            <FormControl fullWidth required error={!!errors.transmission}>
               <InputLabel>Transmission</InputLabel>
               <Select
                 name="transmission"
@@ -216,12 +387,15 @@ const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
                 <MenuItem value="Manual">Manual</MenuItem>
                 <MenuItem value="Automatic">Automatic</MenuItem>
               </Select>
+              {errors.transmission && (
+                <FormHelperText error>{errors.transmission}</FormHelperText>
+              )}
             </FormControl>
           </Stack>
 
           {/* Fifth Row */}
           <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-            <FormControl fullWidth required>
+            <FormControl fullWidth required error={!!errors.status}>
               <InputLabel>Status</InputLabel>
               <Select
                 name="status"
@@ -233,31 +407,44 @@ const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
                 <MenuItem value="Rented">Rented</MenuItem>
                 <MenuItem value="UnderMaintenance">Under Maintenance</MenuItem>
               </Select>
+              {errors.status && (
+                <FormHelperText error>{errors.status}</FormHelperText>
+              )}
             </FormControl>
-            <TextField
-              name="category"
-              label="Category"
-              variant="outlined"
-              fullWidth
-              required
-              value={formData.category}
-              onChange={handleChange}
-            />
+            <FormControl fullWidth error={!!errors.category}>
+              <TextField
+                name="category"
+                label="Category"
+                variant="outlined"
+                fullWidth
+                required
+                value={formData.category}
+                onChange={handleChange}
+              />
+              {errors.category && (
+                <FormHelperText error>{errors.category}</FormHelperText>
+              )}
+            </FormControl>
           </Stack>
 
           {/* Image Upload */}
           <Stack spacing={2}>
-            <Button variant="outlined" component="label">
-              Upload Image
-              <input
-                type="file"
-                name="image"
-                onChange={handleImageChange}
-                accept="image/*"
-                hidden
-                required
-              />
-            </Button>
+            <FormControl fullWidth error={!!errors.image}>
+              <Button variant="outlined" component="label">
+                Upload Image
+                <input
+                  type="file"
+                  name="image"
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  hidden
+                  required
+                />
+              </Button>
+              {errors.image && (
+                <FormHelperText error>{errors.image}</FormHelperText>
+              )}
+            </FormControl>
           </Stack>
 
           {/* Action Buttons */}

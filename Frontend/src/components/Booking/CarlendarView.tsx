@@ -4,8 +4,6 @@ import { Box, Modal, Typography } from "@mui/material";
 import "./style.css";
 import { useState } from "react";
 import ModalRangBooking from "../Modals/ModalRangBooking";
-import ListCustomer from "../common/ListCustomer";
-import ModalCustomer from "../Modals/ModalCustomer";
 import Customer from "../../pages/Customer";
 
 interface Event {
@@ -23,7 +21,7 @@ const CalendarView = ({
 }) => {
   const [isModal, setIsModal] = useState(false);
   // const [selectedEvent, setSelectedEvent] = useState(null);
-  console.log("Select  Car Booking :", selectedCar);
+  // console.log("Select  Car Booking :", selectedCar);
 
   return (
     <Box sx={{ p: 2 }}>
@@ -35,6 +33,7 @@ const CalendarView = ({
           title: event.total.toString(),
           start: event.startDate,
           end: event.endDate,
+          allDay: true,
         }))}
         headerToolbar={{
           left: "prev,next today,customBooking",
@@ -57,6 +56,7 @@ const CalendarView = ({
           );
         }}
         height="auto"
+        // timeZone="local"
       />
       {isModal && (
         <Modal open={isModal} onClose={() => setIsModal(false)}>

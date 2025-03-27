@@ -41,7 +41,7 @@ const Booking = () => {
 
   const handleSelectCar = (id: number): void => {
     setSelectedCar(id);
-    console.log("Selected :", id);
+    // console.log("Selected :", id);
   };
 
   useEffect(() => {
@@ -59,6 +59,7 @@ const Booking = () => {
       return;
     }
     const data: Event[] = await response.json(); // Specify the type of data
+    console.log("Events :", data);
     setEvents(data);
   };
 

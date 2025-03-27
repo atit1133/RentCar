@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import CurrencyBitcoinIcon from "@mui/icons-material/CurrencyBitcoin";
 import {
   Box,
   Typography,
@@ -20,20 +21,17 @@ import {
 } from "recharts";
 import { PieChart, Pie, Cell } from "recharts";
 
-import {
-  apiReportTotalRent,
-  apiReportTotalRevenue,
-  apiReportTotalSales,
-  apiReportTotalRentals,
-} from "../../api/api";
+import { apiReportTotalRent, apiReportTotalRentals } from "../../api/api";
 
 interface MonthlyRentalData {
   startDate: string; // ISO 8601 format (e.g., "2024-01-01T00:00:00")
   total: number;
 }
 
-interface FullReport {
-  total: number;
+interface MonthlyFullReport {
+  Count: number;
+  SumAmount: number;
+  AvgAmount: number;
 }
 
 const COLORS = ["#4CAF50", "#FF5722", "#3F51B5", "#FFC107"];
@@ -49,35 +47,26 @@ const currentYear = new Date().getFullYear();
 const currentMonth = new Date().getMonth() + 1; // Months are 0-indexed
 
 const Dashboard = () => {
-  const [totalRentals, setTotalRentals] = useState(0);
-  const [totalRevenue, setTotalRevenue] = useState(0);
-  const [averageRevenue, setAverageRevenue] = useState(0);
   const [monthlyRentalData, setMonthlyRentalData] = useState<
     MonthlyRentalData[]
   >([]);
-  const [fullReport, setFullReport] = useState<FullReport>();
+  const [fullReport, setFullReport] = useState<MonthlyFullReport | null>(null);
 
-  const fetchTotalRentals = async () => {
-    const response = await apiReportTotalRent("totalRentals");
-    const total = response.reduce((sum: number, data: number) => sum + data, 0);
-    setTotalRentals(total);
-  };
-  const fetchTotalRevenue = async () => {
-    const response = await apiReportTotalRevenue("totalRevenue");
-    const total = response.reduce((sum: number, data: number) => sum + data, 0);
-    setTotalRevenue(total);
-  };
-  const fetchTotalAvg = async () => {
-    const response = await apiReportTotalSales("totalSales");
-    const total = response.reduce((sum: number, data: number) => sum + data, 0);
-    setAverageRevenue(total / response.length);
-  };
   const fetchMonthly = async () => {
     const response: MonthlyRentalData[] = await apiReportTotalRentals(
       `rential/report/${currentYear}/${currentMonth}`
     );
 
-    setFullReport(response);
+    const transformedReport: MonthlyFullReport = {
+      Count: response.length,
+      SumAmount: response.reduce((sum, item) => sum + item.total, 0),
+      AvgAmount:
+        response.length === 0
+          ? 0
+          : response.reduce((sum, item) => sum + item.total, 0) /
+            response.length,
+    };
+    setFullReport(transformedReport);
     // setMonthlyRentalData(response);
   };
 
@@ -98,22 +87,7 @@ const Dashboard = () => {
     }
   };
 
-  const monthlyFullReport =
-    fullReport.map((item) => ({
-      Count: item.total.length, // If item.total is an array, use `.length` to get the count.
-      SumAmount: item.total.reduce(
-        (sum: number, data: number) => sum + data,
-        0
-      ), // This calculates the sum.
-      AvgAmount:
-        item.total.reduce((sum: number, data: number) => sum + data, 0) /
-        item.total.length, // Divide the sum by the count for average.
-    })) || [];
-
   useEffect(() => {
-    // fetchTotalRentals();
-    // fetchTotalRevenue();
-    // fetchTotalAvg();
     fetchMonthlyRentalData();
     fetchMonthly();
   }, []);
@@ -147,16 +121,13 @@ const Dashboard = () => {
       return monthOrder[monthA] - monthOrder[monthB];
     });
 
-  // console.log(monthlyRentalData);
-  console.log(monthlyFullReport);
-
   return (
     <Box sx={{ px: 4, py: 6, bgcolor: "#f9f9f9", minHeight: "100vh" }}>
       <Typography variant="h4" fontWeight="bold" gutterBottom color="primary">
         Car Rental Dashboard
+        {fullReport && ` [${currentMonth}/${currentYear}]`}
       </Typography>
       <Divider sx={{ mb: 4 }} />
-
       <Stack spacing={4}>
         {/* Statistics Section */}
         <Stack direction="row" spacing={4} justifyContent="space-between">
@@ -166,7 +137,7 @@ const Dashboard = () => {
                 Total Rentals
               </Typography>
               <Typography variant="h5" fontWeight="bold">
-                {totalRentals}
+                {fullReport?.Count}
               </Typography>
             </CardContent>
           </Card>
@@ -176,7 +147,7 @@ const Dashboard = () => {
                 Total Revenue
               </Typography>
               <Typography variant="h5" fontWeight="bold">
-                ${totalRevenue}
+                {fullReport?.SumAmount.toFixed(2) + " Bath"}
               </Typography>
             </CardContent>
           </Card>
@@ -186,7 +157,7 @@ const Dashboard = () => {
                 Avg. Revenue/Month
               </Typography>
               <Typography variant="h5" fontWeight="bold">
-                ${averageRevenue.toFixed(2)}
+                {fullReport?.AvgAmount.toFixed(2) + " Bath"}
               </Typography>
             </CardContent>
           </Card>

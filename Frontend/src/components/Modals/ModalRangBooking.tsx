@@ -5,6 +5,9 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { Button, Typography, Box, Paper } from "@mui/material";
 import { useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
+import utc from "dayjs/plugin/utc";
+
+dayjs.extend(utc);
 
 type Rental = {
   rentialId: number;
@@ -38,9 +41,13 @@ export default function ModernDatePicker({
   const [value, setValue] = useState<Rental>(initDatavalue);
 
   const handleSave = async () => {
-    const { carId, ...rest } = value;
+    const { startDate, carId, ...rest } = value;
     const data = {
       ...rest,
+      startDate: value.startDate ? dayjs(value.startDate).format() : null,
+      endDate: value.endDate
+        ? dayjs(value.endDate).hour(23).minute(59).second(59).format() // Set end time to 23:59:59
+        : null,
       carId: bookingId,
       total: value.endDate && value.startDate ? countDate * 2000 : 0,
     };
