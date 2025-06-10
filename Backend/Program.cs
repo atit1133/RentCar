@@ -4,11 +4,16 @@ using rentCar.Data;
 using rentCar.Interfaces;
 using rentCar.Services;
 using MySqlConnector; // Import this
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Get the connection string from configuration
-string connectionString = builder.Configuration.GetConnectionString("MySqlConnection");
+string? connectionString = builder.Configuration.GetConnectionString("MySqlConnection");
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new InvalidOperationException("Connection string 'MySqlConnection' not found.");
+}
 
 // Add the DbContext using the connection string
 builder.Services.AddDbContext<DbContextData>(options =>
@@ -16,6 +21,24 @@ builder.Services.AddDbContext<DbContextData>(options =>
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                System.Text.Encoding.UTF8.GetBytes(
+                    builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not found in configuration.")
+                )
+            )
+        };
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -61,7 +84,8 @@ app.UseStaticFiles(new StaticFileOptions
 
 
 
-
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();

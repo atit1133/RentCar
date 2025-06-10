@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "ENfuje8iXfnxcreg5nB/cDmC2HjzOby56HqlDLtMHAw=",
+  "Hash": "BksUfFWax1xw1rA3KydQwQI5vO/hvFT64rQ/3WyP/WQ=",
   "Source": "rentCar",
   "BasePath": "_content/rentCar",
   "Mode": "Default",
@@ -110,6 +110,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\uploadimages\\7037643b-e98f-46d7-af27-ecbe43433ef8_slider_two.jpg"
+    },
+    {
+      "Identity": "C:\\Users\\Naruemon Aemwong\\OneDrive\\Desktop\\Portfolio\\rentCar\\backend\\wwwroot\\uploadimages\\a34650aa-49ab-4f63-8b43-d9d4a197d319_fried_1.jpg",
+      "SourceId": "rentCar",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\Naruemon Aemwong\\OneDrive\\Desktop\\Portfolio\\rentCar\\backend\\wwwroot\\",
+      "BasePath": "_content/rentCar",
+      "RelativePath": "uploadimages/a34650aa-49ab-4f63-8b43-d9d4a197d319_fried_1.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploadimages\\a34650aa-49ab-4f63-8b43-d9d4a197d319_fried_1.jpg"
     }
   ]
 }

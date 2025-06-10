@@ -11,5 +11,6 @@ namespace rentCar.Interfaces
         Task<User?> AddUser(User user);
         Task<bool> UpdateUser(User user);
         Task<bool> DeleteUser(int userId);
+        Task<string?> GetUserByEmailAndPassword(string email, string password);
     }
 }

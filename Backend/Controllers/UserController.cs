@@ -1,5 +1,9 @@
+using System;
 using System.Collections.Generic;
+using System.Security.Principal;
 using System.Threading.Tasks;
+using Backend.Dto;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using rentCar.Interfaces;
 using rentCar.Models;
@@ -18,6 +22,7 @@ namespace rentCar.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<List<User>>> Get() // Add async
         {
             var UserFetch = await _user.GetUser(); // Add await
@@ -75,5 +80,23 @@ namespace rentCar.Controllers
             }
             return BadRequest();
         }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<string>> Login(LoginDtoClass user) // Add async
+        {            
+            //check if email and password are provided
+            if (string.IsNullOrEmpty(user.Email) || string.IsNullOrEmpty(user.Password))
+            {
+                return BadRequest("Email and password are required!");
+            }
+             var token = await _user.GetUserByEmailAndPassword(user.Email, user.Password); // Assuming this method exists
+            if (token != null)
+            {
+                return Ok(new { token = token}); // Return the token if login is successful
+            }
+            return Unauthorized("Invalid email or password");
+        }
+
+        
     }
 }

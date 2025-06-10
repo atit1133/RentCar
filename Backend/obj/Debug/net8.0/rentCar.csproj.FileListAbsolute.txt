@@ -210,3 +210,12 @@ C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\obj\Debug\n
 C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\obj\Debug\net8.0\rentCar.genruntimeconfig.cache
 C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\obj\Debug\net8.0\ref\rentCar.dll
 C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\bin\Debug\net8.0\rentCar.staticwebassets.runtime.json
+C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\bin\Debug\net8.0\BCrypt.Net-Next.dll
+C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\bin\Debug\net8.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\bin\Debug\net8.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\bin\Debug\net8.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.dll
+C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\bin\Debug\net8.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\bin\Debug\net8.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\Naruemon Aemwong\OneDrive\Desktop\Portfolio\rentCar\backend\bin\Debug\net8.0\System.IdentityModel.Tokens.Jwt.dll

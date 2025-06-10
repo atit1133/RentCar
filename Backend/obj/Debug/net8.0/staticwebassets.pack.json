@@ -21,6 +21,10 @@
       "PackagePath": "staticwebassets\\uploadimages\\7037643b-e98f-46d7-af27-ecbe43433ef8_slider_two.jpg"
     },
     {
+      "Id": "C:\\Users\\Naruemon Aemwong\\OneDrive\\Desktop\\Portfolio\\rentCar\\backend\\wwwroot\\uploadimages\\a34650aa-49ab-4f63-8b43-d9d4a197d319_fried_1.jpg",
+      "PackagePath": "staticwebassets\\uploadimages\\a34650aa-49ab-4f63-8b43-d9d4a197d319_fried_1.jpg"
+    },
+    {
       "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.rentCar.props",
       "PackagePath": "build\\rentCar.props"
     },
