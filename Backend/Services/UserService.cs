@@ -45,6 +45,12 @@ namespace rentCar.Services
             user.Password = BCrypt.Net.BCrypt.HashPassword(user.Password);
             try
             {
+                // Check if the user already exists
+                var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
+                if (existingUser != null)
+                {
+                    return null; // User already exists
+                }
                 await _context.Users.AddAsync(user); // Use AddAsync()
                 await _context.SaveChangesAsync(); // Use SaveChangesAsync()
                 return user;

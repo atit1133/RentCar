@@ -8,8 +8,9 @@ import {
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Paper from "@mui/material/Paper";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import ModalCustomer from "../components/Modals/ModalCustomer";
+import AppContext from "../AppContext";
 
 interface UserData {
   userId: number;
@@ -20,13 +21,21 @@ interface UserData {
 }
 
 const Customer = () => {
+  const { handleLogout } = useContext(AppContext);
   const [openModal, setOpenModal] = useState(false);
-  const [rows, setRows] = useState<UserData[]>([]);
+  const [rowsTable, setRowsTable] = useState<UserData[]>([]);
 
   const fetchRows = async () => {
     try {
-      const response = await fetch("http://localhost:5297/api/user");
+      const response = await fetch("http://localhost:5297/api/user", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Use token from localStorage
+        },
+      });
       if (!response.ok) {
+        handleLogout(); // Logout if the response is not ok
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const data: UserData[] = await response.json();
@@ -47,9 +56,14 @@ const Customer = () => {
     try {
       const response = await fetch(`http://localhost:5297/api/user/${id}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Use token from localStorage
+        },
       });
 
       if (!response.ok) {
+        handleLogout(); // Logout if the response is not ok
         const errorData = await response.json();
         throw new Error(
           errorData.message || `HTTP error! status: ${response.status}`
@@ -64,7 +78,7 @@ const Customer = () => {
 
   const refreshDataGrid = async () => {
     const data = await fetchRows();
-    setRows(data);
+    setRowsTable(data);
   };
 
   useEffect(() => {
@@ -136,7 +150,7 @@ const Customer = () => {
 
       <Paper sx={{ p: 2, borderRadius: 2, boxShadow: 3 }}>
         <DataGrid
-          rows={rows}
+          rows={rowsTable}
           columns={columns}
           // paginationModel={{ pageSize: 5, page:  }}
           pagination

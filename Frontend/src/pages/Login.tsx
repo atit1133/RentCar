@@ -7,29 +7,67 @@ import {
   OutlinedInput,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import AppContext from "../AppContext";
 
 const Login = () => {
-  const [username, setUsername] = useState({
+  const [user, setUser] = useState({
     username: "",
     password: "",
     confirmPassword: "",
     email: "",
     phone: "",
   });
-  const [isLogin, setIsLogin] = useState(true);
-  // const [showPassword, setShowPassword] = useState(true);
+  const { handleLogin } = useContext(AppContext);
+  const [isRegister, setRegister] = useState(false);
 
-  const handleRegister = () => {
-    setIsLogin(false);
+  const handleRegister = async () => {
+    const response = await fetch("http://localhost:5297/api/User/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: user.username,
+        password: user.password,
+        confirmPassword: user.confirmPassword,
+        email: user.email,
+        phone: user.phone,
+      }),
+    });
+    if (!response.ok) {
+      console.error("Register failed");
+      return;
+    }
+    await clickLogin();
   };
-  const handleLogin = () => {
-    setIsLogin(true);
+  const clickLogin = async () => {
+    const response = await fetch("http://localhost:5297/api/User/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: user.email,
+        password: user.password,
+      }),
+    });
+    if (!response.ok) {
+      console.error("Login failed");
+      return;
+    }
+    const data = await response.json();
+    console.log(data);
+    handleLogin(data.token);
+    console.log("Login clicked");
   };
 
   const handleChange = (e: any) => {
-    setUsername({ ...username, [e.target.name]: e.target.value });
-    console.log(username);
+    setUser({ ...user, [e.target.name]: e.target.value });
+  };
+
+  const clickRegister = () => {
+    setRegister(!isRegister);
   };
 
   return (
@@ -52,7 +90,7 @@ const Login = () => {
             borderRadius: "10px",
           }}
         >
-          {isLogin ? (
+          {!isRegister ? (
             <Box
               sx={{
                 display: "flex", // Use flexbox for horizontal layout
@@ -79,7 +117,11 @@ const Login = () => {
                 variant="outlined"
               >
                 <InputLabel>Username</InputLabel>
-                <OutlinedInput onChange={handleChange} label="Username" />
+                <OutlinedInput
+                  name="email"
+                  onChange={handleChange}
+                  label="Username"
+                />
               </FormControl>
               <FormControl
                 variant="outlined"
@@ -89,8 +131,31 @@ const Login = () => {
                 <InputLabel htmlFor="outlined-adornment-password">
                   Password
                 </InputLabel>
-                <OutlinedInput onChange={handleChange} label="Password" />
+                <OutlinedInput
+                  name="password"
+                  onChange={handleChange}
+                  label="Password"
+                  type="password"
+                />
               </FormControl>
+              <Box
+                sx={{
+                  m: 1,
+                  width: "100%",
+                  textAlign: "center",
+                  gap: 2,
+                  display: "flex",
+                  justifyContent: "center",
+                  paddingBottom: "20px",
+                }}
+              >
+                <Button variant="contained" onClick={clickLogin}>
+                  Login
+                </Button>
+                <Button variant="outlined" onClick={clickRegister}>
+                  Register
+                </Button>
+              </Box>
             </Box>
           ) : (
             <Box>
@@ -119,7 +184,11 @@ const Login = () => {
                   variant="outlined"
                 >
                   <InputLabel>Username</InputLabel>
-                  <OutlinedInput onChange={handleChange} label="Username" />
+                  <OutlinedInput
+                    name="username"
+                    onChange={handleChange}
+                    label="Username"
+                  />
                 </FormControl>
                 <FormControl
                   variant="outlined"
@@ -129,7 +198,12 @@ const Login = () => {
                   <InputLabel htmlFor="outlined-adornment-password">
                     Password
                   </InputLabel>
-                  <OutlinedInput onChange={handleChange} label="Password" />
+                  <OutlinedInput
+                    name="password"
+                    onChange={handleChange}
+                    label="Password"
+                    type="password"
+                  />
                 </FormControl>
                 <FormControl
                   variant="outlined"
@@ -140,6 +214,7 @@ const Login = () => {
                     Confirm Password
                   </InputLabel>
                   <OutlinedInput
+                    name="confirmPassword"
                     onChange={handleChange}
                     label="Confirm Password"
                   />
@@ -152,7 +227,11 @@ const Login = () => {
                   <InputLabel htmlFor="outlined-adornment-password">
                     Email
                   </InputLabel>
-                  <OutlinedInput onChange={handleChange} label="Email" />
+                  <OutlinedInput
+                    name="email"
+                    onChange={handleChange}
+                    label="Email"
+                  />
                 </FormControl>
                 <FormControl
                   variant="outlined"
@@ -162,30 +241,34 @@ const Login = () => {
                   <InputLabel htmlFor="outlined-adornment-password">
                     Phone
                   </InputLabel>
-                  <OutlinedInput onChange={handleChange} label="Phone" />
+                  <OutlinedInput
+                    name="phone"
+                    onChange={handleChange}
+                    label="Phone"
+                  />
                 </FormControl>
                 {/* </Box> */}
               </Box>
+              <Box
+                sx={{
+                  m: 1,
+                  width: "100%",
+                  textAlign: "center",
+                  gap: 2,
+                  display: "flex",
+                  justifyContent: "center",
+                  paddingBottom: "20px",
+                }}
+              >
+                <Button variant="contained" onClick={handleRegister}>
+                  Register
+                </Button>
+                <Button variant="outlined" onClick={clickRegister}>
+                  Login
+                </Button>
+              </Box>
             </Box>
           )}
-          <Box
-            sx={{
-              m: 1,
-              width: "100%",
-              textAlign: "center",
-              gap: 2,
-              display: "flex",
-              justifyContent: "center",
-              paddingBottom: "20px",
-            }}
-          >
-            <Button variant="contained" onClick={handleLogin}>
-              Login
-            </Button>
-            <Button variant="outlined" onClick={handleRegister}>
-              Register
-            </Button>
-          </Box>
         </Box>
       </Box>
     </Container>

@@ -14,6 +14,7 @@ import About from "./pages/About";
 import Customer from "./pages/Customer";
 import Report from "./pages/Report";
 import { Typography } from "@mui/material";
+import "./index.css";
 
 const App = () => {
   const { isLogin, handleLogin, handleLogout } = useContext(AppContext);
