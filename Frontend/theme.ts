@@ -7,6 +7,10 @@ declare module "@mui/material/styles" {
       secondary?: string;
     };
   }
+  interface TypeText {
+    alert?: string;
+    success?: string;
+  }
 }
 
 const theme = createTheme({
@@ -22,6 +26,8 @@ const theme = createTheme({
     text: {
       primary: "#4D869C",
       secondary: "#5c6bc0",
+      alert: "#d32f2f", // Example danger color
+      success: "#388e3c", // Example success color
     },
     add: {
       primary: "#7AB2B2",

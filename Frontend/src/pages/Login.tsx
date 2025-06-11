@@ -8,6 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AppContext from "../AppContext";
 
 const Login = () => {
@@ -18,8 +19,13 @@ const Login = () => {
     email: "",
     phone: "",
   });
-  const { handleLogin } = useContext(AppContext);
+  const { handleLogin, handleMenu } = useContext(AppContext);
   const [isRegister, setRegister] = useState(false);
+  const [alert, setAlert] = useState({
+    type: "",
+    message: "",
+  });
+  const navigate = useNavigate();
 
   const handleRegister = async () => {
     const response = await fetch("http://localhost:5297/api/User/register", {
@@ -36,6 +42,10 @@ const Login = () => {
       }),
     });
     if (!response.ok) {
+      setAlert({
+        type: "error",
+        message: "Registration failed. Please try again.",
+      });
       console.error("Register failed");
       return;
     }
@@ -53,16 +63,24 @@ const Login = () => {
       }),
     });
     if (!response.ok) {
+      setAlert({
+        type: "error",
+        message: "Login failed. Please try again.",
+      });
       console.error("Login failed");
       return;
     }
     const data = await response.json();
     console.log(data);
     handleLogin(data.token);
+    // window.location.href = "/";
+    navigate("/");
+    handleMenu();
     console.log("Login clicked");
   };
 
   const handleChange = (e: any) => {
+    setAlert({ type: "", message: "" });
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
@@ -73,7 +91,7 @@ const Login = () => {
   return (
     <Container
       maxWidth="sm"
-      sx={{ height: "100vh", display: "flex", color: "text.secondary.main" }}
+      sx={{ height: "80vh", display: "flex", color: "text.secondary.main" }}
     >
       <Box
         sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}
@@ -103,41 +121,51 @@ const Login = () => {
               }}
             >
               <Box sx={{ textAlign: "center", width: "100%" }}>
-                <Typography variant="h2">Login Page</Typography>
+                <Typography variant="h2">Rental Car Management </Typography>
                 <Typography variant="body1" mt={2}>
                   Please login to continue
                 </Typography>
                 <br />
               </Box>
-              <FormControl
-                sx={{
-                  m: 1,
-                  width: "50%",
-                }}
-                variant="outlined"
-              >
-                <InputLabel>Username</InputLabel>
-                <OutlinedInput
-                  name="email"
-                  onChange={handleChange}
-                  label="Username"
-                />
-              </FormControl>
-              <FormControl
-                variant="outlined"
-                sx={{ m: 1, width: "50%" }}
-                id="outlined-adornment-password"
-              >
-                <InputLabel htmlFor="outlined-adornment-password">
-                  Password
-                </InputLabel>
-                <OutlinedInput
-                  name="password"
-                  onChange={handleChange}
-                  label="Password"
-                  type="password"
-                />
-              </FormControl>
+              <Box sx={{ width: "100%", textAlign: "center" }}>
+                <FormControl
+                  sx={{
+                    m: 1,
+                    width: "50%",
+                  }}
+                  variant="outlined"
+                >
+                  <InputLabel>Username</InputLabel>
+                  <OutlinedInput
+                    name="email"
+                    onChange={handleChange}
+                    label="Username"
+                  />
+                </FormControl>
+                <FormControl
+                  variant="outlined"
+                  sx={{ m: 1, width: "50%" }}
+                  id="outlined-adornment-password"
+                >
+                  <InputLabel htmlFor="outlined-adornment-password">
+                    Password
+                  </InputLabel>
+                  <OutlinedInput
+                    name="password"
+                    onChange={handleChange}
+                    label="Password"
+                    type="password"
+                  />
+                </FormControl>
+              </Box>
+              <Box>
+                {alert.type === "error" && (
+                  <Typography variant="body2" color="text.alert">
+                    {alert.message}
+                  </Typography>
+                )}
+              </Box>
+
               <Box
                 sx={{
                   m: 1,
@@ -171,9 +199,7 @@ const Login = () => {
                 }}
               >
                 <Box sx={{ textAlign: "center", width: "100%" }}>
-                  <h1>Register Page</h1>
                   <p>Please register to continue</p>
-                  <br />
                 </Box>
                 {/* <Box> */}
                 <FormControl

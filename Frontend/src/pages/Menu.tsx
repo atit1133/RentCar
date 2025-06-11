@@ -13,7 +13,7 @@ import AppContext from "../AppContext";
 import { useNavigate } from "react-router-dom";
 
 const Menu: React.FC = () => {
-  const { isMenu, handleMenu } = useContext(AppContext);
+  const { isMenu, handleMenu, handleLogout } = useContext(AppContext);
   const navigate = useNavigate();
 
   const menuList = [
@@ -26,6 +26,10 @@ const Menu: React.FC = () => {
   ];
 
   const handleMenuPath = (path: string) => {
+    if (path === "/logout") {
+      handleLogout();
+      return navigate("/");
+    }
     navigate(path);
     handleMenu();
   };
@@ -56,16 +60,6 @@ const Menu: React.FC = () => {
         ))}
       </List>
       <Divider />
-      {/* <List>
-        <ListItem disablePadding>
-          <ListItemButton onClick={handleMenu}>
-            <ListItemIcon>
-              <InboxIcon />
-            </ListItemIcon>
-            <ListItemText primary="DashBoard" />
-          </ListItemButton>
-        </ListItem>
-      </List> */}
     </Box>
   );
 

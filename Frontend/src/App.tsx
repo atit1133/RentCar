@@ -15,9 +15,11 @@ import Customer from "./pages/Customer";
 import Report from "./pages/Report";
 import { Typography } from "@mui/material";
 import "./index.css";
+import BookingPage from "./pages/BookingPage";
+import Footer from "./components/common/Footer";
 
 const App = () => {
-  const { isLogin, handleLogin, handleLogout } = useContext(AppContext);
+  const { isLogin, handleLogout } = useContext(AppContext);
 
   return (
     <div>
@@ -27,20 +29,14 @@ const App = () => {
           {isLogin ? (
             <>
               <Menu />
-              <button onClick={handleLogout}>Logout</button>
+              {/* <button onClick={handleLogout}>Logout</button> */}
             </>
           ) : (
-            <>
-              {/* <Login /> */}
-              <Typography variant="h1" color="primary" align="center">
-                Please Login
-              </Typography>
-              <button onClick={() => handleLogin("newToken")}>Login</button>
-            </>
+            <></>
           )}
           <Routes>
-            <Route path="/" element={isLogin ? <Home /> : <Login />} />
-            <Route path="/home" element={isLogin ? <Home /> : <Login />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/rent" element={isLogin ? <Booking /> : <Login />} />
             <Route
               path="/details"
@@ -53,10 +49,23 @@ const App = () => {
             <Route path="/report" element={isLogin ? <Report /> : <Login />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/services" element={<Services />} />
-            <Route path="/about" element={<About />} />
-            <Route path="*" element={<h1>Not Found</h1>} />
+            <Route path="/about us" element={<About />} />
+            <Route path="/booking" element={<BookingPage />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="*"
+              element={
+                <Typography
+                  variant="h1"
+                  sx={{ textAlign: "center", marginTop: "60px" }}
+                >
+                  Page Not Found
+                </Typography>
+              }
+            />
           </Routes>
         </Router>
+        <Footer />
       </ErrorBoundary>
     </div>
   );

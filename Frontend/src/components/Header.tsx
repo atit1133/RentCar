@@ -71,7 +71,6 @@ export default function ButtonAppBar() {
               </>
             )}
           </Box>
-          {/* <Button color="inherit">Login</Button> */}
         </Toolbar>
       </AppBar>
     </Box>
