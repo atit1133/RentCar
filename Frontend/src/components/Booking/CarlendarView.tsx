@@ -15,13 +15,13 @@ interface Event {
 const CalendarView = ({
   events,
   selectedCar,
+  fetchEvents,
 }: {
   events: Event[];
   selectedCar: number | null;
+  fetchEvents: () => void;
 }) => {
   const [isModal, setIsModal] = useState(false);
-  // const [selectedEvent, setSelectedEvent] = useState(null);
-  // console.log("Select  Car Booking :", selectedCar);
 
   return (
     <Box sx={{ p: 2 }}>
@@ -32,7 +32,10 @@ const CalendarView = ({
         events={events.map((event) => ({
           title: event.total.toString(),
           start: event.startDate,
-          end: event.endDate,
+          // Add 1 day to endDate for correct FullCalendar display
+          end: new Date(
+            new Date(event.endDate).getTime() + 24 * 60 * 60 * 1000
+          ),
           allDay: true,
         }))}
         headerToolbar={{
@@ -56,16 +59,12 @@ const CalendarView = ({
           );
         }}
         height="auto"
-        // timeZone="local"
       />
       {isModal && (
         <Modal open={isModal} onClose={() => setIsModal(false)}>
           <Box
             sx={{
               p: 2,
-              // textAlign: "center",
-              // justifyContent: "center",
-              // alignItems: "center",
               display: "flex",
               flexDirection: "row",
               gap: "1rem",
@@ -79,11 +78,11 @@ const CalendarView = ({
             }}
           >
             <Typography variant="h6">Booking Car</Typography>
-            {/* <ListCustomer /> */}
             <Customer />
             <ModalRangBooking
               closeModal={() => setIsModal(false)}
               bookingId={Number(selectedCar)}
+              fetchEvents={fetchEvents}
             />
           </Box>
         </Modal>

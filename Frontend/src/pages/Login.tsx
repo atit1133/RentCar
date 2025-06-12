@@ -14,9 +14,9 @@ import AppContext from "../AppContext";
 const Login = () => {
   const [user, setUser] = useState({
     username: "",
-    password: "",
+    password: "forTest",
     confirmPassword: "",
-    email: "",
+    email: "admin@mail.com",
     phone: "",
   });
   const { handleLogin, handleMenu } = useContext(AppContext);
@@ -26,9 +26,10 @@ const Login = () => {
     message: "",
   });
   const navigate = useNavigate();
+  const url = import.meta.env.VITE_RENTAL_APP_API_URL;
 
   const handleRegister = async () => {
-    const response = await fetch("http://localhost:5297/api/User/register", {
+    const response = await fetch(url + "/api/User/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -52,7 +53,7 @@ const Login = () => {
     await clickLogin();
   };
   const clickLogin = async () => {
-    const response = await fetch("http://localhost:5297/api/User/login", {
+    const response = await fetch(url + "/api/User/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -135,11 +136,12 @@ const Login = () => {
                   }}
                   variant="outlined"
                 >
-                  <InputLabel>Username</InputLabel>
+                  <InputLabel>Email</InputLabel>
                   <OutlinedInput
                     name="email"
                     onChange={handleChange}
                     label="Username"
+                    defaultValue={user.email}
                   />
                 </FormControl>
                 <FormControl
@@ -155,6 +157,7 @@ const Login = () => {
                     onChange={handleChange}
                     label="Password"
                     type="password"
+                    defaultValue={user.password}
                   />
                 </FormControl>
               </Box>

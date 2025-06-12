@@ -55,7 +55,7 @@ export default function ButtonAppBar() {
                   fontSize: "1rem",
                 }}
               >
-                Welcome, User
+                Welcome, Admin
               </Typography>
             ) : (
               <>

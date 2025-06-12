@@ -34,11 +34,14 @@ const initDatavalue: Rental = {
 export default function ModernDatePicker({
   bookingId,
   closeModal,
+  fetchEvents,
 }: {
   bookingId: number;
   closeModal: () => void;
+  fetchEvents: () => void;
 }) {
   const [value, setValue] = useState<Rental>(initDatavalue);
+  const url = import.meta.env.VITE_RENTAL_APP_API_URL;
 
   const handleSave = async () => {
     const { startDate, carId, ...rest } = value;
@@ -55,7 +58,7 @@ export default function ModernDatePicker({
 
     // Add your logic here to send the data to the backend
     try {
-      const response = await fetch("http://localhost:5297/api/Rential", {
+      const response = await fetch(url + "/api/Rential", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -74,6 +77,7 @@ export default function ModernDatePicker({
       console.error("Failed to save rental:", error);
       // ... Handle error (e.g., show error message)
     }
+    fetchEvents(); // Refresh the events after saving
     closeModal();
   };
 

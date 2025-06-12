@@ -177,10 +177,11 @@ const ModalCar = ({ openModal, setOpenModal, refreshData }: ModalCarProps) => {
       setImageError(null);
     }
   };
+  const url = import.meta.env.VITE_RENTAL_APP_API_URL;
 
   const fetchSaveCar = async (formData: FormData) => {
     try {
-      const response = await fetch("http://localhost:5297/api/car", {
+      const response = await fetch(url + "/api/car", {
         method: "POST",
         body: formData,
       });

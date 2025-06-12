@@ -43,6 +43,7 @@ const ModalCustomer = ({
   });
   const [apiError, setApiError] = useState<string | null>(null);
   const [success, setSuccess] = useState<boolean>(false);
+  const url = import.meta.env.VITE_RENTAL_APP_API_URL;
 
   const validateForm = (): boolean => {
     let isValid = true;
@@ -86,7 +87,7 @@ const ModalCustomer = ({
     }
 
     try {
-      const response = await fetch("http://localhost:5297/api/user", {
+      const response = await fetch(url + "/api/user", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

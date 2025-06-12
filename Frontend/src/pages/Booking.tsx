@@ -25,9 +25,10 @@ const Booking = () => {
   const [cars, setCars] = useState<Car[]>([]);
   const [selectedCar, setSelectedCar] = useState<number | null>(null);
   const [events, setEvents] = useState<Event[]>([]); // Specify the type of events
+  const url = import.meta.env.VITE_RENTAL_APP_API_URL;
 
   const fetchCars = async () => {
-    const response = await fetch("http://localhost:5297/api/car");
+    const response = await fetch(url + "/api/car");
     if (!response.ok) {
       console.error("Failed to fetch cars");
       return;
@@ -52,7 +53,7 @@ const Booking = () => {
     if (!selectedCar) return; // Exit if no car is selected
 
     const response = await fetch(
-      `http://localhost:5297/api/Rential/${selectedCar}` // Use selectedCar here
+      `${url}/api/Rential/${selectedCar}` // Use selectedCar here
     );
     if (!response.ok) {
       console.error("Failed to fetch events");
@@ -67,10 +68,6 @@ const Booking = () => {
     fetchEvents();
   }, [selectedCar]); // fetchEvents when selectedCar changes
 
-  useEffect(() => {
-    console.log("Events :", events); // Log events when they change
-  }, [events]);
-
   return (
     <Box sx={{ display: "flex", height: "100vh" }}>
       <CarList
@@ -78,7 +75,11 @@ const Booking = () => {
         selectedCar={selectedCar}
         onSelectCar={handleSelectCar}
       />
-      <CalendarView selectedCar={selectedCar} events={events} />
+      <CalendarView
+        selectedCar={selectedCar}
+        events={events}
+        fetchEvents={fetchEvents}
+      />
     </Box>
   );
 };

@@ -24,10 +24,11 @@ const Customer = () => {
   const { handleLogout } = useContext(AppContext);
   const [openModal, setOpenModal] = useState(false);
   const [rowsTable, setRowsTable] = useState<UserData[]>([]);
+  const url = import.meta.env.VITE_RENTAL_APP_API_URL;
 
   const fetchRows = async () => {
     try {
-      const response = await fetch("http://localhost:5297/api/user", {
+      const response = await fetch(url + "/api/user", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -54,7 +55,7 @@ const Customer = () => {
 
   const fetchDeleteRow = async (id: number) => {
     try {
-      const response = await fetch(`http://localhost:5297/api/user/${id}`, {
+      const response = await fetch(`${url}/api/user/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
